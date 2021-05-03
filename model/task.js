@@ -1,17 +1,39 @@
 const mongoose = require("mongoose");
-const { Project} = require('./project')
 
-const taskSchema = mongoose.Schema({
-    name : String,
-    startTime : Date,
-    endTime : Date,
-    description : String,
-    projects : [{
-        type : mongoose.Schema.Types.ObjectId,
-        ref : "Project"
-    }],
-})
+const taskSchema = mongoose.Schema(
+  {
+    name: String,
+    startTime: Date,
+    endTime: Date,
+    description: String,
+    estHrs: Number,
+    projectRatio: { type: Number, min: 0, max: 100 },
+    status: {
+      type: String,
+      enum: ["pending", "working", "completed", "canceled"],
+      default: "pending",
+    },
+    parentTask: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tasks",
+      default: null,
+    },
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+    },
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  },
+  { timestamps: true }
+);
 
-const Tasks = mongoose.model("Tasks",taskSchema)
+const Tasks = mongoose.model("Tasks", taskSchema);
 
 module.exports.Tasks = Tasks;
