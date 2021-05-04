@@ -4,6 +4,7 @@ const multer = require("multer");
 var fs = require("fs");
 var path = require("path");
 const { User } = require("../../model/user");
+const { UserProfile } = require("../../model/userProfile");
 const bcrypt = require("bcryptjs");
 const _ = require("lodash");
 const jwt = require("jsonwebtoken");
@@ -50,17 +51,21 @@ router.post("/register", upload, async (req, res) => {
   if (user)
     return res.status(400).send("User With Given Email Already Exsists");
   user = new User();
-  user.firstName = req.body.firstName;
-  user.middleName = req.body.middleName;
-  user.lastName = req.body.lastName;
+  user.name = req.body.name;
   user.email = req.body.email;
-  user.image = req.file.filename;
   user.password = req.body.password;
+  userprofile = new UserProfile(req.body);
+  userprofile
+    .save()
+    .then((resp) => {
+      return res.send(resp);
+    })
+    .catch((err) => {
+      return res.status(500).send({ error: err });
+    });
   await user.generateHashedPassword();
   await user.save();
-  return res.send(
-    _.pick(user, ["firstName", "middleName", "lastName", "email"])
-  );
+  return res.send(_.pick(user, ["name", "email"]));
 });
 
 // Sign In
@@ -73,11 +78,8 @@ router.post("/login", async (req, res) => {
   let token = jwt.sign(
     {
       _id: user._id,
-      firstName: user.firstName,
-      middleName: user.middleName,
-      lastName: user.lastName,
+      name: user.name,
       role: user.role,
-      image: user.image,
     },
     config.get("jwtPrivateKey")
   );
@@ -89,29 +91,21 @@ router.put("/:id", auth, admin, upload, async (req, res) => {
   try {
     let user = await User.findById(req.params.id);
     if (!user) return res.status(400).send("User with given id is not present");
-    user.firstName = req.body.firstName;
-    user.middleName = req.body.middleName;
-    user.lastName = req.body.lastName;
+    user.name = req.body.name;
     user.email = req.body.email;
-    user.image = req.file.path;
     user.password = req.body.password;
     await user.generateHashedPassword();
     await user.save();
     let token = jwt.sign(
       {
         _id: user._id,
-        firstName: user.firstName,
-        middleName: user.middleName,
-        lastName: user.lastName,
+        name: user.name,
         role: user.role,
-        image: user.image,
       },
       config.get("jwtPrivateKey")
     );
     let dataToReturn = {
-      firstName: user.firstName,
-      middleName: user.middleName,
-      lastName: user.lastName,
+      name: user.name,
       email: user.email,
       token: user.token,
     };

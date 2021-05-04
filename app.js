@@ -19,6 +19,7 @@ var apiNatureRouter = require("./routes/api/nature");
 var apiPlatformRouter = require("./routes/api/platform");
 var apiServiceRouter = require("./routes/api/service");
 var apiCountryRouter = require("./routes/api/country");
+var apiUserProfileRouter = require("./routes/api/userProfile");
 
 var app = express();
 
@@ -44,6 +45,7 @@ app.use("/nature", apiNatureRouter);
 app.use("/platform", apiPlatformRouter);
 app.use("/service", apiServiceRouter);
 app.use("/country", apiCountryRouter);
+app.use("/profile", apiUserProfileRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

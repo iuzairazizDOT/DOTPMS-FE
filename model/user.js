@@ -4,12 +4,9 @@ const { Project } = require("./project");
 
 const userSchema = mongoose.Schema(
   {
-    firstName: String,
-    middleName: String,
-    lastName: String,
+    name: String,
     email: String,
     password: String,
-    image: String,
     role: {
       type: String,
       default: "User",
