@@ -11,10 +11,10 @@ router.get("/show-projects", async (req, res) => {
   let skipRecords = perPage * (page - 1);
   let projects = await Project.find()
     .populate("tasks")
-    .populate("createdBy", "firstName")
+    .populate("createdBy", "name")
     .populate("client")
     .populate("platform")
-    .populate("assignedUser", "firstName role")
+    .populate("assignedUser", "name role")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(projects);

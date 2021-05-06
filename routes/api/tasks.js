@@ -13,7 +13,7 @@ router.get("/show-task", async (req, res) => {
     .populate("projects")
     .populate("parentTask")
     .populate("project")
-    .populate("addedby")
+    .populate("addedby", "name")
     .populate("approvedBy")
     .populate("assignedTo")
     .skip(skipRecords)
