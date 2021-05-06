@@ -10,7 +10,7 @@ const taskSchema = mongoose.Schema(
     projectRatio: { type: Number, min: 0, max: 100 },
     status: {
       type: String,
-      enum: ["pending", "working", "completed", "canceled"],
+      enum: ["pending", "approved"],
       default: "pending",
     },
     parentTask: {
@@ -29,7 +29,14 @@ const taskSchema = mongoose.Schema(
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      default: null,
     },
+    assignedTo: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );
