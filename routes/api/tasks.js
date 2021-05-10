@@ -13,6 +13,7 @@ router.get("/show-task", async (req, res) => {
     .populate("projects")
     .populate("parentTask")
     .populate("project")
+    .populate("teamLead")
     .populate("addedby", "name")
     .populate("approvedBy")
     .populate("assignedTo")
@@ -61,6 +62,19 @@ router.delete("/:id", async (req, res) => {
   } catch {
     return res.status(400).send("Invalid Task Id"); // when id is inavlid
   }
+});
+
+router.get("/project-tasks/:id", async (req, res) => {
+  let tasks = await Tasks.find({ project: req.params.id })
+    .populate("projects")
+    .populate("parentTask")
+    .populate("project")
+    .populate("teamLead")
+    .populate("addedby", "name")
+    .populate("approvedBy")
+    .populate("assignedTo");
+
+  return res.send(tasks);
 });
 
 module.exports = router;
