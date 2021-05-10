@@ -7,6 +7,8 @@ const clientScheme = mongoose.Schema(
     address: String,
     mobileNo: Number,
     email: String,
+    url: String,
+    dateOfJoin: Date,
   },
   { timestamps: true }
 );
