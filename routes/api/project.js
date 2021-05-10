@@ -11,10 +11,13 @@ router.get("/show-projects", async (req, res) => {
   let skipRecords = perPage * (page - 1);
   let projects = await Project.find()
     .populate("tasks")
-    .populate("createdBy", "name")
+    .populate("createdBy")
     .populate("client")
+    .populate("nature")
+    .populate("technology")
     .populate("platform")
-    .populate("assignedUser", "name role")
+    .populate("assignedUser")
+    .populate("projectManager")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(projects);
@@ -22,7 +25,7 @@ router.get("/show-projects", async (req, res) => {
 
 /* Add New Project . */
 router.post("/create-project", async (req, res) => {
-  let projects = await Project.findOne({ project_name: req.body.project_name });
+  let projects = await Project.findOne({ name: req.body.name });
   if (projects)
     return res.status(400).send("Project With Given Name Already Exsists");
   project = new Project(req.body);
