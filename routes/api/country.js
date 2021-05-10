@@ -38,7 +38,8 @@ router.put("/:id", async (req, res) => {
     console.log(country);
     if (!country)
       return res.status(400).send("country with given id is not present");
-    country = extend(country, req.body);
+    // country = extend(country, req.body);
+    country.name = req.body.name;
     await country.save();
     return res.send(country);
   } catch {

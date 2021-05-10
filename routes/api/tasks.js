@@ -15,6 +15,7 @@ router.get("/show-task", async (req, res) => {
     .populate("project")
     .populate("addedby", "name")
     .populate("approvedBy")
+    .populate("assignedTo")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(tasks);
@@ -23,8 +24,7 @@ router.get("/show-task", async (req, res) => {
 /*Add new task*/
 router.post("/create-task", async (req, res) => {
   let tasks = await Tasks.findOne({ name: req.body.name });
-  if (tasks)
-    return res.status(400).send("Task With Given Name Already Exsists");
+  if (tasks) return res.status(400).send("Task With Given Name Already Exists");
   task = new Tasks(req.body);
   task
     .save()
