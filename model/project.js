@@ -10,6 +10,18 @@ const projectScheme = mongoose.Schema(
     status: { type: Number, max: 3 },
     remarks: String,
     workdone: String,
+    technology: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Technology",
+      },
+    ],
+    nature: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Nature",
+      },
+    ],
     tasks: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -38,6 +50,12 @@ const projectScheme = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    projectManager: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     assignedUser: [
       {
         type: mongoose.Schema.Types.ObjectId,
