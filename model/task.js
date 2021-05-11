@@ -26,6 +26,10 @@ const taskSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    teamLead: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     approvedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
