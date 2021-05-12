@@ -67,4 +67,20 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+router.post("/whereEmployee/:id", async (req, res) => {
+  try {
+    console.log("emp id", req.params.id);
+    let project = await Project.find({
+      assignedUser: { _id: req.params.id },
+    });
+    if (!project) {
+      return res.status(404).send("Project with given id is not present"); // when there is no id in db
+    }
+    return res.send(project); // when everything is okay
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("invalid id"); // when id is inavlid
+  }
+});
+
 module.exports = router;

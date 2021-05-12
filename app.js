@@ -20,6 +20,7 @@ var apiPlatformRouter = require("./routes/api/platform");
 var apiServiceRouter = require("./routes/api/service");
 var apiCountryRouter = require("./routes/api/country");
 var apiUserProfileRouter = require("./routes/api/userProfile");
+var apiTimesheetRouter = require("./routes/api/timesheet");
 
 var app = express();
 
@@ -46,6 +47,7 @@ app.use("/platform", apiPlatformRouter);
 app.use("/service", apiServiceRouter);
 app.use("/country", apiCountryRouter);
 app.use("/profile", apiUserProfileRouter);
+app.use("/timesheet", apiTimesheetRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

@@ -77,4 +77,22 @@ router.get("/project-tasks/:id", async (req, res) => {
   return res.send(tasks);
 });
 
+router.post("/by-employee-project", async (req, res) => {
+  let { empId, projectId } = req.body;
+  console.log("body", req.body);
+  try {
+    let tasks = await Tasks.find({
+      project: projectId,
+      assignedTo: { _id: empId },
+    }).populate("assignedTo");
+    if (!tasks) {
+      return res.status(404).send("Task with given id is not present"); // when there is no id in db
+    }
+    return res.send(tasks); // when everything is okay
+  } catch (err) {
+    console.log("error", err.message);
+    return res.status(400).send("Invalid Id"); // when id is inavlid
+  }
+});
+
 module.exports = router;

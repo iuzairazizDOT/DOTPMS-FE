@@ -21,7 +21,7 @@ var Storage = multer.diskStorage({
     );
   },
 });
- 
+
 var upload = multer({
   storage: Storage,
   fileFilter: (req, file, cb) => {
@@ -58,7 +58,7 @@ router.post("/register", upload, async (req, res) => {
   userprofile
     .save()
     .then((resp) => {
-      return res.send(resp);
+      // return res.send(resp);
     })
     .catch((err) => {
       return res.status(500).send({ error: err });
