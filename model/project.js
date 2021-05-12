@@ -10,6 +10,8 @@ const projectScheme = mongoose.Schema(
     status: { type: Number, max: 3 },
     remarks: String,
     workdone: String,
+    cost: Number,
+    orderNumber: String,
     technology: [
       {
         type: mongoose.Schema.Types.ObjectId,
