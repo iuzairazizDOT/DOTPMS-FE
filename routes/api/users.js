@@ -53,19 +53,16 @@ router.post("/register", upload, async (req, res) => {
   user = new User();
   user.name = req.body.name;
   user.email = req.body.email;
+  user.gender = req.body.gender;
+  user.status = req.body.status;
+  user.joiningDate = req.body.joiningDate;
   user.password = req.body.password;
-  userprofile = new UserProfile(req.body);
-  userprofile
-    .save()
-    .then((resp) => {
-      // return res.send(resp);
-    })
-    .catch((err) => {
-      return res.status(500).send({ error: err });
-    });
+  user.salary = req.body.salary;
   await user.generateHashedPassword();
   await user.save();
-  return res.send(_.pick(user, ["name", "email"]));
+  return res.send(
+    _.pick(user, ["name", "email", "gender", "salary", "status", "joiningDate"])
+  );
 });
 
 // Sign In
