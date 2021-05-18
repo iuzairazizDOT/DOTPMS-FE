@@ -21,6 +21,8 @@ var apiServiceRouter = require("./routes/api/service");
 var apiCountryRouter = require("./routes/api/country");
 var apiUserProfileRouter = require("./routes/api/userProfile");
 var apiTimesheetRouter = require("./routes/api/timesheet");
+var apiCurrencyRouter = require("./routes/api/currency");
+var apiStatusRouter = require("./routes/api/status");
 
 var app = express();
 
@@ -48,6 +50,8 @@ app.use("/service", apiServiceRouter);
 app.use("/country", apiCountryRouter);
 app.use("/profile", apiUserProfileRouter);
 app.use("/timesheet", apiTimesheetRouter);
+app.use("/currency", apiCurrencyRouter);
+app.use("/status", apiStatusRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
