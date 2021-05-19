@@ -19,7 +19,7 @@ router.post("/create-currency", async (req, res) => {
     name: req.body.name,
   });
   if (currency)
-    return res.status(400).send("client With Given Name Already Exsists");
+    return res.status(400).send("currency With Given Name Already Exsists");
   currency = new Currency(req.body);
   currency
     .save()
@@ -51,7 +51,7 @@ router.delete("/:id", async (req, res) => {
   try {
     let currency = await Currency.findByIdAndDelete(req.params.id);
     if (!currency) {
-      return res.status(400).send("client with given id is not present"); // when there is no id in db
+      return res.status(400).send("currency with given id is not present"); // when there is no id in db
     }
     return res.send(currency); // when everything is okay
   } catch {
