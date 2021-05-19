@@ -52,6 +52,14 @@ const projectScheme = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    currency: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Currency",
+    },
+    status: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Status",
+    },
     projectManager: [
       {
         type: mongoose.Schema.Types.ObjectId,
