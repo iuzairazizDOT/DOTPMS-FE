@@ -58,6 +58,7 @@ router.post("/register", upload, async (req, res) => {
   user.joiningDate = req.body.joiningDate;
   user.password = req.body.password;
   user.salary = req.body.salary;
+  user.workingHrs = req.body.workingHrs;
   await user.generateHashedPassword();
   await user.save();
   return res.send(
@@ -91,6 +92,11 @@ router.put("/:id", auth, admin, upload, async (req, res) => {
     user.name = req.body.name;
     user.email = req.body.email;
     user.password = req.body.password;
+    user.gender = req.body.gender;
+    user.status = req.body.status;
+    user.joiningDate = req.body.joiningDate;
+    user.salary = req.body.salary;
+    user.workingHrs = req.body.workingHrs;
     await user.generateHashedPassword();
     await user.save();
     let token = jwt.sign(

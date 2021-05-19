@@ -7,7 +7,6 @@ const projectScheme = mongoose.Schema(
     endDate: Date,
     description: String,
     estHrs: Number,
-    status: { type: String, max: 3 },
     remarks: String,
     workdone: String,
     cost: String,

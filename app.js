@@ -24,6 +24,7 @@ var apiTimesheetRouter = require("./routes/api/timesheet");
 var apiCurrencyRouter = require("./routes/api/currency");
 var apiStatusRouter = require("./routes/api/status");
 var apiExpenseCategoryRouter = require("./routes/api/expenseCategory");
+var apiExpenseRouter = require("./routes/api/expense");
 
 var app = express();
 
@@ -54,6 +55,7 @@ app.use("/timesheet", apiTimesheetRouter);
 app.use("/currency", apiCurrencyRouter);
 app.use("/status", apiStatusRouter);
 app.use("/expense-category", apiExpenseCategoryRouter);
+app.use("/expense", apiExpenseRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
