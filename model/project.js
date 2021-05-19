@@ -7,23 +7,27 @@ const projectScheme = mongoose.Schema(
     endDate: Date,
     description: String,
     estHrs: Number,
-    status: { type: Number, max: 3 },
+    status: { type: String, max: 3 },
     remarks: String,
     workdone: String,
-    cost: Number,
-    orderNumber: String,
-    technology: [
+    cost: String,
+    orderNum: String,
+    Rprofit: String,
+    Pdeduction: String,
+    percentage: String,
+    fCost: String,
+    technology: 
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Technology",
       },
-    ],
-    nature: [
+    
+    nature: 
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Nature",
       },
-    ],
+    
     tasks: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -52,18 +56,20 @@ const projectScheme = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    projectManager: [
+    projectManager: 
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-    ],
+    
     assignedUser: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
     ],
+      
+    
   },
   { timestamps: true }
 );
