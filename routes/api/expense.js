@@ -20,9 +20,7 @@ router.post("/create-expense", async (req, res) => {
   });
   if (expense)
     return res.status(400).send("client With Given Name Already Exsists");
-  expense = new Expense(req.body);
-  expense
-    .save()
+  expense = Expense.insertMany(req.body)
     .then((resp) => {
       return res.send(resp);
     })
