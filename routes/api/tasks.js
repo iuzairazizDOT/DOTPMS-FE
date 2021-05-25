@@ -77,6 +77,41 @@ router.get("/project-tasks/:id", async (req, res) => {
   return res.send(tasks);
 });
 
+router.get("/:id", async (req, res) => {
+  let task = await Tasks.findById(req.params.id)
+    .populate("projects")
+    .populate("parentTask")
+    .populate("project")
+    .populate("teamLead")
+    .populate("addedby", "name")
+    .populate("approvedBy")
+    .populate("assignedTo");
+
+  let subTasks = await Tasks.find({ parentTask: task._id })
+    .populate("projects")
+    .populate("parentTask")
+    .populate("project")
+    .populate("teamLead")
+    .populate("addedby", "name")
+    .populate("approvedBy")
+    .populate("assignedTo");
+
+  return res.send({ task, subtasks });
+});
+
+router.get("/parents", async (req, res) => {
+  let tasks = await Tasks.find({ parentTask: null })
+    .populate("projects")
+    .populate("parentTask")
+    .populate("project")
+    .populate("teamLead")
+    .populate("addedby", "name")
+    .populate("approvedBy")
+    .populate("assignedTo");
+
+  return res.send(tasks);
+});
+
 router.post("/by-employee-project", async (req, res) => {
   let { empId, projectId } = req.body;
   console.log("body", req.body);
