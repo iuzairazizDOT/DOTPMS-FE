@@ -18,6 +18,7 @@ router.get("/show-projects", async (req, res) => {
     .populate("platform")
     .populate("assignedUser")
     .populate("projectManager")
+    .populate("status")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(projects);
