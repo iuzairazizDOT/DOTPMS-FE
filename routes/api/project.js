@@ -2,14 +2,52 @@ var express = require("express");
 const { extend } = require("lodash");
 var router = express.Router();
 const _ = require("lodash");
+var moment = require("moment");
 const { Project } = require("../../model/project");
 
 /*Get Projects*/
 router.get("/show-projects", async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+  let status = req.query.status ? req.query.status : "";
+  let platForm = req.query.platForm ? req.query.platForm : "";
+  let technology = req.query.technology ? req.query.technology : "";
+  let startDate = req.query.startDate ? req.query.startDate : "";
+  let endDate = req.query.endDate ? req.query.endDate : "";
   let skipRecords = perPage * (page - 1);
-  let projects = await Project.find()
+  let requestObject = {};
+  if (status) {
+    requestObject.status = `${status}`;
+  } else {
+    null;
+  }
+
+  if (platForm) {
+    requestObject.platform = `${platForm}`;
+  } else {
+    null;
+  }
+  if (technology) {
+    requestObject.technology = `${technology}`;
+  } else {
+    null;
+  }
+  if (endDate) {
+    let enddate = {};
+    enddate.$gte = moment(endDate).startOf("day");
+    requestObject.cEnddate = enddate;
+  } else {
+    null;
+  }
+  if (startDate) {
+    let startdate = {};
+    startdate.$gte = moment(startDate).startOf("day");
+    requestObject.cStartDate = startdate;
+  } else {
+    null;
+  }
+
+  let projects = await Project.find(requestObject)
     .populate("tasks")
     .populate("createdBy")
     .populate("client")
