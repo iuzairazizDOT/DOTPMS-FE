@@ -63,12 +63,11 @@ const projectScheme = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Status",
     },
-    projectManager: [
+    projectManager: 
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-    ],
     assignedUser: [
       {
         type: mongoose.Schema.Types.ObjectId,
