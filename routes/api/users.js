@@ -103,39 +103,14 @@ router.put("/:id", async (req, res) => {
   if (!user) {
     return res.status(400).send("User with given id is not present"); // when there is no id in db
   }
-  user.name = req.body.name;
-  user.email = req.body.email;
-  user.password = req.body.password;
-  user.gender = req.body.gender;
-  user.status = req.body.status;
-  user.joiningDate = req.body.joiningDate;
-  user.salary = req.body.salary;
-  user.workingHrs = req.body.workingHrs;
-  user.machineNo = req.body.machineNo;
-  user.workingDays = req.body.workingDays;
-  user.userRole = req.body.userRole;
   user.technology = req.body.technology;
-  await user.generateHashedPassword();
-  await user.save();
-  let token = jwt.sign(
-    {
-      _id: user._id,
-      name: user.name,
-      role: user.role,
-    },
-    config.get("jwtPrivateKey")
-  );
-  let dataToReturn = {
-    name: user.name,
-    email: user.email,
-    token: user.token,
-  };
-  return res.send(dataToReturn);
+  user.save();
+  return res.send(user.technology);
 });
 
 router.get("/:id", async (req, res) => {
   try {
-    let user = await User.findById(req.params.id);
+    let user = await User.findById(req.params.id).populate("technology");
     if (!user) {
       return res.status(400).send("User with given id is not present"); // when there is no id in db
     }
