@@ -8,7 +8,7 @@ const { Project } = require("../../model/project");
 /*Get Projects*/
 router.get("/show-projects", async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
-  let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+  let perPage = Number(req.query.perPage ? req.query.perPage : 20);
   let status = req.query.status ? req.query.status : "";
   let platForm = req.query.platForm ? req.query.platForm : "";
   let technology = req.query.technology ? req.query.technology : "";
@@ -51,6 +51,8 @@ router.get("/show-projects", async (req, res) => {
     .populate("assignedUser")
     .populate("projectManager")
     .populate("status")
+    .populate("service")
+    .populate("currency")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(projects);
