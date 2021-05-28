@@ -65,7 +65,17 @@ router.post("/register", upload, async (req, res) => {
   await user.generateHashedPassword();
   await user.save();
   return res.send(
-    _.pick(user, ["name", "email", "gender", "salary", "status", "joiningDate", "userRole", "machineNo", "workingDays"])
+    _.pick(user, [
+      "name",
+      "email",
+      "gender",
+      "salary",
+      "status",
+      "joiningDate",
+      "userRole",
+      "machineNo",
+      "workingDays",
+    ])
   );
 });
 
@@ -88,41 +98,39 @@ router.post("/login", async (req, res) => {
 });
 
 // Update User
-router.put("/:id", auth, upload, async (req, res) => {
-  try {
-    let user = await User.findById(req.params.id);
-    if (!user) return res.status(400).send("User with given id is not present");
-    user.name = req.body.name;
-    user.email = req.body.email;
-    user.password = req.body.password;
-    user.gender = req.body.gender;
-    user.status = req.body.status;
-    user.joiningDate = req.body.joiningDate;
-    user.salary = req.body.salary;
-    user.workingHrs = req.body.workingHrs;
-    user.machineNo = req.body.machineNo;
-    user.workingDays = req.body.workingDays;
-    user.userRole = req.body.userRole;
-    user.technology = req.body.technology;
-    await user.generateHashedPassword();
-    await user.save();
-    let token = jwt.sign(
-      {
-        _id: user._id,
-        name: user.name,
-        role: user.role,
-      },
-      config.get("jwtPrivateKey")
-    );
-    let dataToReturn = {
-      name: user.name,
-      email: user.email,
-      token: user.token,
-    };
-    return res.send(dataToReturn);
-  } catch (err) {
-    return res.status(400).send("Invalid Id"); // when id is inavlid
+router.put("/:id", async (req, res) => {
+  let user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(400).send("User with given id is not present"); // when there is no id in db
   }
+  user.name = req.body.name;
+  user.email = req.body.email;
+  user.password = req.body.password;
+  user.gender = req.body.gender;
+  user.status = req.body.status;
+  user.joiningDate = req.body.joiningDate;
+  user.salary = req.body.salary;
+  user.workingHrs = req.body.workingHrs;
+  user.machineNo = req.body.machineNo;
+  user.workingDays = req.body.workingDays;
+  user.userRole = req.body.userRole;
+  user.technology = req.body.technology;
+  await user.generateHashedPassword();
+  await user.save();
+  let token = jwt.sign(
+    {
+      _id: user._id,
+      name: user.name,
+      role: user.role,
+    },
+    config.get("jwtPrivateKey")
+  );
+  let dataToReturn = {
+    name: user.name,
+    email: user.email,
+    token: user.token,
+  };
+  return res.send(dataToReturn);
 });
 
 router.get("/:id", async (req, res) => {

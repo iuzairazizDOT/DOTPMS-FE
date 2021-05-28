@@ -32,13 +32,7 @@ router.get("/show-projects", async (req, res) => {
   } else {
     null;
   }
-  if (endDate) {
-    let enddate = {};
-    enddate.$gte = moment(endDate).startOf("day");
-    requestObject.cEnddate = enddate;
-  } else {
-    null;
-  }
+
   if (startDate) {
     let startdate = {};
     startdate.$gte = moment(startDate).startOf("day");
