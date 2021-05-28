@@ -36,6 +36,41 @@ router.post("/", async (req, res) => {
     });
 });
 
+router.post("/weekly", async (req, res) => {
+  const body = req.body;
+  console.log("body",body);
+  let records = [];
+  let counter = body.counter;
+  var i,j;
+  for (i = 1; i <= counter; i++) {
+    for(j=0;j<7;j++){
+      records.push({
+        employee:body.empId,
+        task:body[`task${i}taskId`],
+        date:body[`task${i}day${j}date`],
+        workedHrs:body[`task${i}day${j}hrs`],
+      })
+    } 
+  }
+  
+  let result = await Timesheet.bulkWrite(
+    records.map(r => { 
+      return { updateOne:
+        {
+          filter: { date:r.date,employee:body.empId,task:r.task },
+          update: {$set: r},
+          upsert : true
+        }
+      }
+    }
+    ),
+    { ordered : false }
+  );
+
+  res.send(result);
+  console.log("recrds",records);
+});
+
 // Update Timesheet
 router.put("/:id", async (req, res) => {
   try {

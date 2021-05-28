@@ -1,6 +1,7 @@
 var express = require("express");
 const _ = require("lodash");
 const { extend } = require("lodash");
+const mongoose = require("mongoose");
 var router = express.Router();
 const { Tasks } = require("../../model/task");
 
@@ -77,6 +78,19 @@ router.get("/project-tasks/:id", async (req, res) => {
   return res.send(tasks);
 });
 
+router.get("/parents", async (req, res) => {
+  let tasks = await Tasks.find({ parentTask: null })
+    .populate("projects")
+    .populate("parentTask")
+    .populate("project")
+    .populate("teamLead")
+    .populate("addedby")
+    .populate("approvedBy")
+    .populate("assignedTo");
+
+  return res.send(tasks);
+});
+
 router.get("/:id", async (req, res) => {
   let task = await Tasks.findById(req.params.id)
     .populate("projects")
@@ -99,19 +113,6 @@ router.get("/:id", async (req, res) => {
   return res.send({ task, subtasks });
 });
 
-router.get("/parents", async (req, res) => {
-  let tasks = await Tasks.find({ parentTask: null })
-    .populate("projects")
-    .populate("parentTask")
-    .populate("project")
-    .populate("teamLead")
-    .populate("addedby", "name")
-    .populate("approvedBy")
-    .populate("assignedTo");
-
-  return res.send(tasks);
-});
-
 router.post("/by-employee-project", async (req, res) => {
   let { empId, projectId } = req.body;
   console.log("body", req.body);
@@ -128,6 +129,45 @@ router.post("/by-employee-project", async (req, res) => {
     console.log("error", err.message);
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
+});
+
+router.get("/employee/:id", async (req, res) => {
+  let empId = req.params.id;
+
+  console.log("empId==", empId);
+  try {
+    let result = await Tasks.aggregate([
+      { $project: { name: 1, project: 1, assignedTo: 1 } },
+      { $match: { assignedTo: mongoose.Types.ObjectId(empId) } },
+      { $group: { _id: "$project", tasks: { $push: "$$ROOT" } } },
+      {
+        $lookup: {
+          from: "projects",
+          localField: "_id",
+          foreignField: "_id",
+          as: "project",
+        },
+      },
+      {
+        $project: {
+          tasks: 1,
+          project: { $arrayElemAt: ["$project", 0] },
+          _id: 0,
+        },
+      },
+      // {$replaceRoot:{"newRoot":"$project"}}
+    ]);
+    if (!result) {
+      return res.status(404).send("Task with given employee id is not present"); // when there is no id in db
+    }
+    res.send(result);
+  } catch (err) {
+    console.log("error", err.message);
+    return res.status(400).send("Invalid Id"); // when id is inavlid
+  }
+
+  // let result = await Tasks.find({assignedTo:{_id:empId}});
+  // console.log("resulttt",result)
 });
 
 module.exports = router;
