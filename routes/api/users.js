@@ -39,7 +39,7 @@ var upload = multer({
 /* GET Users */
 router.get("/", async function (req, res, next) {
   let page = Number(req.query.page ? req.query.page : 1);
-  let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+  let perPage = Number(req.query.perPage ? req.query.perPage : 100);
   let skipRecords = perPage * (page - 1);
   let user = await User.find().skip(skipRecords).limit(perPage);
   return res.send(user);
@@ -59,10 +59,23 @@ router.post("/register", upload, async (req, res) => {
   user.password = req.body.password;
   user.salary = req.body.salary;
   user.workingHrs = req.body.workingHrs;
+  user.machineNo = req.body.machineNo;
+  user.workingDays = req.body.workingDays;
+  user.userRole = req.body.userRole;
   await user.generateHashedPassword();
   await user.save();
   return res.send(
-    _.pick(user, ["name", "email", "gender", "salary", "status", "joiningDate"])
+    _.pick(user, [
+      "name",
+      "email",
+      "gender",
+      "salary",
+      "status",
+      "joiningDate",
+      "userRole",
+      "machineNo",
+      "workingDays",
+    ])
   );
 });
 
@@ -85,41 +98,30 @@ router.post("/login", async (req, res) => {
 });
 
 // Update User
-router.put("/:id", auth, admin, upload, async (req, res) => {
+router.put("/:id", async (req, res) => {
+  let user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(400).send("User with given id is not present"); // when there is no id in db
+  }
+  user.technology = req.body.technology;
+  user.save();
+  return res.send(user.technology);
+});
+
+router.get("/:id", async (req, res) => {
   try {
-    let user = await User.findById(req.params.id);
-    if (!user) return res.status(400).send("User with given id is not present");
-    user.name = req.body.name;
-    user.email = req.body.email;
-    user.password = req.body.password;
-    user.gender = req.body.gender;
-    user.status = req.body.status;
-    user.joiningDate = req.body.joiningDate;
-    user.salary = req.body.salary;
-    user.workingHrs = req.body.workingHrs;
-    await user.generateHashedPassword();
-    await user.save();
-    let token = jwt.sign(
-      {
-        _id: user._id,
-        name: user.name,
-        role: user.role,
-      },
-      config.get("jwtPrivateKey")
-    );
-    let dataToReturn = {
-      name: user.name,
-      email: user.email,
-      token: user.token,
-    };
-    return res.send(dataToReturn);
-  } catch (err) {
-    return res.status(400).send("Invalid Id"); // when id is inavlid
+    let user = await User.findById(req.params.id).populate("technology");
+    if (!user) {
+      return res.status(400).send("User with given id is not present"); // when there is no id in db
+    }
+    return res.send(user); // when everything is okay
+  } catch {
+    return res.status(400).send("Invalid User Id"); // when id is inavlid
   }
 });
 
 // Delete user
-router.delete("/:id", auth, admin, async (req, res) => {
+router.delete("/:id", async (req, res) => {
   try {
     let user = await User.findByIdAndDelete(req.params.id);
     if (!user) {

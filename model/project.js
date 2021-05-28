@@ -3,8 +3,10 @@ const mongoose = require("mongoose");
 const projectScheme = mongoose.Schema(
   {
     name: String,
-    startDate: Date,
-    endDate: Date,
+    cStartDate: Date,
+    cEndDate: Date,
+    pmStartDate: Date,
+    pmEndDate: Date,
     description: String,
     estHrs: Number,
     remarks: String,
@@ -61,16 +63,18 @@ const projectScheme = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Status",
     },
-    projectManager: [
+    projectManager: 
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-    ],
     assignedUser: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
+      },
+      {
+        
       },
     ],
   },

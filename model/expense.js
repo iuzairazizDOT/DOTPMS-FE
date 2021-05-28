@@ -4,6 +4,7 @@ const expenseScheme = mongoose.Schema(
   {
     name: String,
     cost: Number,
+    date: Date,
   },
   { timestamps: true }
 );

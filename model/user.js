@@ -12,6 +12,15 @@ const userSchema = mongoose.Schema(
     password: String,
     status: String,
     joiningDate: String,
+    machineNo: Number,
+    workingDays: Number,
+    userRole: String,
+    technology: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Technology",
+      },
+    ],
     role: {
       type: String,
       default: "User",
