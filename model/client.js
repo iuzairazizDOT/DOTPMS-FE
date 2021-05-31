@@ -9,6 +9,10 @@ const clientScheme = mongoose.Schema(
     email: String,
     url: String,
     dateOfJoin: Date,
+    country: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Country",
+    },
   },
   { timestamps: true }
 );
