@@ -7,6 +7,7 @@ const taskSchema = mongoose.Schema(
     endTime: Date,
     description: String,
     estHrs: Number,
+    workDone: { type: Number, min: 0, max: 100 , default:0},
     projectRatio: { type: Number, min: 0, max: 100 },
     status: {
       type: String,
