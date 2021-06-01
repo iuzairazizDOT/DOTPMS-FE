@@ -95,6 +95,7 @@ router.get("/parents", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
+  console.log(req.params.id);
   let task = await Tasks.findById(req.params.id)
     .populate("projects")
     .populate("parentTask")
@@ -113,7 +114,7 @@ router.get("/:id", async (req, res) => {
     .populate("approvedBy")
     .populate("assignedTo");
 
-  return res.send({ task, subtasks });
+  return res.send({ task, subTasks });
 });
 
 router.post("/by-employee-project", async (req, res) => {

@@ -15,6 +15,7 @@ const userSchema = mongoose.Schema(
     machineNo: Number,
     workingDays: Number,
     userRole: String,
+    image: String,
     technology: [
       {
         type: mongoose.Schema.Types.ObjectId,
