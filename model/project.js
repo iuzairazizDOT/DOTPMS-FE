@@ -17,6 +17,12 @@ const projectScheme = mongoose.Schema(
     Pdeduction: String,
     percentage: String,
     fCost: String,
+    phase: [
+      {
+        phasename: String,
+        estTime: String,
+      },
+    ],
     technology: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Technology",
@@ -63,19 +69,16 @@ const projectScheme = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Status",
     },
-    projectManager: 
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "User",
-      },
+    projectManager: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
     assignedUser: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
-      {
-        
-      },
+      {},
     ],
   },
   { timestamps: true }

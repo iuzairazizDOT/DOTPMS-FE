@@ -3,18 +3,22 @@ const _ = require("lodash");
 const { extend } = require("lodash");
 var router = express.Router();
 const { Client } = require("../../model/client");
+const auth = require("../../middlewares/auth");
 
 /* Get All Designations And Users */
-router.get("/show-client", async (req, res) => {
+router.get("/show-client", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
-  let client = await Client.find().populate("country").skip(skipRecords).limit(perPage);
+  let client = await Client.find()
+    .populate("country")
+    .skip(skipRecords)
+    .limit(perPage);
   return res.send(client);
 });
 
 /*Add new Designation*/
-router.post("/create-client", async (req, res) => {
+router.post("/create-client", auth, async (req, res) => {
   let client = await Client.findOne({
     name: req.body.name,
   });
@@ -32,7 +36,7 @@ router.post("/create-client", async (req, res) => {
 });
 
 // Update Designation
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let client = await Client.findById(req.params.id);
     console.log(client);
@@ -47,7 +51,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete Designation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let client = await Client.findByIdAndDelete(req.params.id);
     if (!client) {

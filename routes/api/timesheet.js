@@ -6,9 +6,10 @@ const { Timesheet } = require("../../model/timesheet");
 const { Project } = require("../../model/project");
 const moment = require("moment");
 const { Tasks } = require("../../model/task");
+const auth = require("../../middlewares/auth");
 
 /* Get Timesheet */
-router.get("/", async (req, res) => {
+router.get("/", auth, async (req, res) => {
   let timesheet = await Timesheet.find()
     .populate("employee")
     .populate("task")
@@ -17,7 +18,7 @@ router.get("/", async (req, res) => {
 });
 
 /*Add new timesheet*/
-router.post("/", async (req, res) => {
+router.post("/", auth, async (req, res) => {
   let timesheet = await Timesheet.findOne({
     date: req.body.date,
     employee: req.body.employee,
@@ -38,37 +39,36 @@ router.post("/", async (req, res) => {
     });
 });
 
-router.post("/weekly", async (req, res) => {
+router.post("/weekly", auth, async (req, res) => {
   try {
-      const data = req.body.employeeData;
-      const empId = req.body.empId;
-      const days = req.body.days;
-    console.log("body",req.body);
+    const data = req.body.employeeData;
+    const empId = req.body.empId;
+    const days = req.body.days;
+    console.log("body", req.body);
     // console.log("asddasda",moment(body["task1day1date"]).format("YYYY-MM-DD"));
     let records = [];
     // let noOfRecords = body.counter;
-    var i,j;
-    let taskRecords= [];
-    data.map(project=>{
-      project.tasks.map(task=>{
-
-        if(task.workDone){
+    var i, j;
+    let taskRecords = [];
+    data.map((project) => {
+      project.tasks.map((task) => {
+        if (task.workDone) {
           taskRecords.push({
-            workDone:task.workDone,
-            _id:task._id
-          })
+            workDone: task.workDone,
+            _id: task._id,
+          });
         }
-        [0,1,2,3,4,5,6].map(item=>{
+        [0, 1, 2, 3, 4, 5, 6].map((item) => {
           records.push({
-            employee:empId,
-            task:task._id,
-            date:moment(days[item]).format("YYYY-MM-DD"),
-            workedHrs:task.timesheet[item] && task.timesheet[item].workedHrs,
-            remarks:task.timesheet[item] && task.timesheet[item].remarks,
-            approvedBy:null,
-            status:"pending",
-          })
-        })
+            employee: empId,
+            task: task._id,
+            date: moment(days[item]).format("YYYY-MM-DD"),
+            workedHrs: task.timesheet[item] && task.timesheet[item].workedHrs,
+            remarks: task.timesheet[item] && task.timesheet[item].remarks,
+            approvedBy: null,
+            status: "pending",
+          });
+        });
         // task.timesheet.map(ts=>{
         //   if(ts!=null){
         //     records.push({
@@ -83,10 +83,8 @@ router.post("/weekly", async (req, res) => {
         //     })
         //   }
         // })
-      })
-    })
-
-
+      });
+    });
 
     // for (i = 1; i <= noOfRecords; i++) {
     //   for(j=0;j<7;j++){
@@ -98,47 +96,44 @@ router.post("/weekly", async (req, res) => {
     //       approvedBy:null,
     //       status:"pending",
     //     })
-    //   } 
+    //   }
     // }
-    
+
     let result = await Timesheet.bulkWrite(
-      records.map(r => { 
-        return { updateOne:
-          {
-            filter: { date:r.date,employee:empId,task:r.task },
-            update: {$set: r},
-            upsert : true
-          }
-        }
-      }
-      ),
-      { ordered : false }
+      records.map((r) => {
+        return {
+          updateOne: {
+            filter: { date: r.date, employee: empId, task: r.task },
+            update: { $set: r },
+            upsert: true,
+          },
+        };
+      }),
+      { ordered: false }
     );
 
     let taskResult = await Tasks.bulkWrite(
-      taskRecords.map(r => { 
-        return { updateOne:
-          {
-            filter: { _id:r._id },
-            update: {$set: {workDone:r.workDone}},
-            
-          }
-        }
-      }
-      ),
+      taskRecords.map((r) => {
+        return {
+          updateOne: {
+            filter: { _id: r._id },
+            update: { $set: { workDone: r.workDone } },
+          },
+        };
+      })
     );
 
-    res.send({result,taskResult});  
+    res.send({ result, taskResult });
   } catch (error) {
-    console.log("error is",error);
-    res.status(500).send({error});
+    console.log("error is", error);
+    res.status(500).send({ error });
   }
-  
+
   // console.log("recrds",records);
 });
 
 // Update Timesheet
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let timesheet = await Timesheet.findById(req.params.id);
     console.log(timesheet);
@@ -153,7 +148,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete user
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let timesheet = await Timesheet.findByIdAndDelete(req.params.id);
     if (!timesheet) {

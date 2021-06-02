@@ -3,9 +3,10 @@ const _ = require("lodash");
 const { extend } = require("lodash");
 var router = express.Router();
 const { Technology } = require("../../model/technologies");
+const auth = require("../../middlewares/auth");
 
 /* Get All Designations And Users */
-router.get("/show-technologies", async (req, res) => {
+router.get("/show-technologies", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
@@ -14,7 +15,7 @@ router.get("/show-technologies", async (req, res) => {
 });
 
 /*Add new Designation*/
-router.post("/create-technologies", async (req, res) => {
+router.post("/create-technologies", auth, async (req, res) => {
   let technology = await Technology.findOne({
     name: req.body.name,
   });
@@ -32,7 +33,7 @@ router.post("/create-technologies", async (req, res) => {
 });
 
 // Update Designation
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let technology = await Technology.findById(req.params.id);
     console.log(technology);
@@ -47,7 +48,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete Designation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let technology = await Technology.findByIdAndDelete(req.params.id);
     if (!technology) {
