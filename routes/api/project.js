@@ -3,6 +3,7 @@ const { extend } = require("lodash");
 var router = express.Router();
 const _ = require("lodash");
 var moment = require("moment");
+const  Mongoose  = require("mongoose");
 const { Project } = require("../../model/project");
 
 /*Get Projects*/
@@ -108,6 +109,100 @@ router.post("/whereEmployee/:id", async (req, res) => {
     let project = await Project.find({
       assignedUser: { _id: req.params.id },
     });
+    if (!project) {
+      return res.status(404).send("Project with given id is not present"); // when there is no id in db
+    }
+    return res.send(project); // when everything is okay
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("invalid id"); // when id is inavlid
+  }
+});
+
+router.get("/project-with-tasks/:projectId", async (req, res) => {
+  try {
+    console.log("emp id", req.params.id);
+    
+    let project = await Project.aggregate([
+      { $match: { _id: Mongoose.Types.ObjectId(req.params.projectId) } },
+      {$lookup:{
+        from:"tasks",
+        let: { projectId: "$_id" },
+        pipeline:[
+          {
+            $match:{$expr:{$and:[{$eq:["$$projectId","$project"]},{$eq:["$parentTask",null]}]} },      
+          },
+          {
+            $lookup:
+            {
+              from:"timesheets",
+              let : {taskID:"$_id"},
+              pipeline:[
+                {$match:{$expr:{$and:[{$eq:["$$taskID","$task"]},{$ne:["$workedHrs",null]}]} },},
+                {$group:{_id:null,hours:{$sum:"$workedHrs"}}},
+              ],
+              as:"actualHours"}},
+              {$unwind:"$actualHours"},
+              {$addFields:{actualHrs:"$actualHours.hours"}},
+              {$project:{actualHours:0}
+            },
+        ],
+        as:"tasks",
+      }},
+      
+    ]);
+    if (!project) {
+      return res.status(404).send("Project with given id is not present"); // when there is no id in db
+    }
+    return res.send(project); // when everything is okay
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("invalid id"); // when id is inavlid
+  }
+});
+
+router.get("/report", async (req, res) => {
+  try {
+    console.log("emp id", req.params.id);
+    
+    let project = await Project.aggregate([
+      // { $match: { _id: Mongoose.Types.ObjectId(req.params.projectId) } },
+      {
+        $lookup:
+        {
+            from:"tasks",
+            let: { projectId: "$_id" },
+            pipeline:[
+              {
+                $match:{$expr:{$and:[{$eq:["$$projectId","$project"]},{$eq:["$parentTask",null]}]} },      
+              },
+              {
+                $lookup:
+                {
+                  from:"timesheets",
+                  let : {taskID:"$_id"},
+                  pipeline:[
+                    {$match:{$expr:{$and:[{$eq:["$$taskID","$task"]},{$ne:["$workedHrs",null]}]} },},
+                    {$group:{_id:null,hours:{$sum:"$workedHrs"}}},
+                  ],
+                  as:"actualHours"
+                }
+              },
+              {$unwind:"$actualHours"},
+              {$addFields:{actualHrs:"$actualHours.hours"}},
+              {$project:{actualHours:0}},
+              {$group:{_id:null,projectHrs:{$sum:"$actualHrs"},workedDone:{$sum:"$workDone"}}},
+              
+            ],
+            as:"tasks",        
+        }
+      },
+      // {$unwind:"$tasks"},
+      // {$addFields:{actualHrs:"$tasks.projectHrs",workDone:"$tasks.workedDone"}},
+      // {$project:{tasks:0}}
+
+      
+    ]);
     if (!project) {
       return res.status(404).send("Project with given id is not present"); // when there is no id in db
     }

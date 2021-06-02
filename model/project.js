@@ -27,12 +27,6 @@ const projectScheme = mongoose.Schema(
       ref: "Nature",
     },
 
-    tasks: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Tasks",
-      },
-    ],
     client: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
