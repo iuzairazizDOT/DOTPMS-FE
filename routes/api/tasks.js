@@ -4,6 +4,9 @@ const { extend } = require("lodash");
 const mongoose = require("mongoose");
 var router = express.Router();
 const { Tasks } = require("../../model/task");
+const moment = require("moment");
+
+
 
 /* Get Tasks */
 router.get("/show-task", async (req, res) => {
@@ -132,14 +135,29 @@ router.post("/by-employee-project", async (req, res) => {
   }
 });
 
-router.get("/employee/:id", async (req, res) => {
-  let empId = req.params.id;
+router.post("/employee", async (req, res) => {
+  let empId = req.body.empId;
+  let startDate = moment(req.body.startDate).toDate();
+  let endDate = moment(req.body.endDate).toDate();
 
   console.log("empId==", empId);
+  console.log("start==", startDate);
+  console.log("end==", endDate);
   try {
     let result = await Tasks.aggregate([
-      { $project: { name: 1, project: 1, assignedTo: 1 } },
+      { $project: { name: 1, project: 1, assignedTo: 1,workDone:1 } },
       { $match: { assignedTo: mongoose.Types.ObjectId(empId) } },
+      {$lookup:{
+        from:"timesheets",
+        let: { taskId: "$_id" },
+        pipeline:[
+          {
+            $match:{$expr:{$and:[{$eq:["$$taskId","$task"]},{$gte:["$date",startDate]},{$lte:["$date",endDate]}]} },
+          },
+          
+        ],
+        as:"timesheet",
+      }},
       { $group: { _id: "$project", tasks: { $push: "$$ROOT" } } },
       {
         $lookup: {
