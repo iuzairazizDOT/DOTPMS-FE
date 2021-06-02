@@ -3,9 +3,10 @@ const _ = require("lodash");
 const { extend } = require("lodash");
 var router = express.Router();
 const { Platform } = require("../../model/platform");
+const auth = require("../../middlewares/auth");
 
 /* Get All Designations And Users */
-router.get("/show-platform", async (req, res) => {
+router.get("/show-platform", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
@@ -14,7 +15,7 @@ router.get("/show-platform", async (req, res) => {
 });
 
 /*Add new Designation*/
-router.post("/create-platform", async (req, res) => {
+router.post("/create-platform", auth, async (req, res) => {
   let platform = await Platform.findOne({
     name: req.body.name,
   });
@@ -32,7 +33,7 @@ router.post("/create-platform", async (req, res) => {
 });
 
 // Update Designation
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let platform = await Platform.findById(req.params.id);
     console.log(platform);
@@ -47,7 +48,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete Designation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let platform = await Platform.findByIdAndDelete(req.params.id);
     if (!platform) {

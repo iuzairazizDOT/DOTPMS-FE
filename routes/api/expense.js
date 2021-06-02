@@ -3,9 +3,10 @@ const _ = require("lodash");
 const { extend } = require("lodash");
 var router = express.Router();
 const { Expense } = require("../../model/expense");
+const auth = require("../../middlewares/auth");
 
 /* Get All Designations And Users */
-router.get("/show-expense", async (req, res) => {
+router.get("/show-expense", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
@@ -14,7 +15,7 @@ router.get("/show-expense", async (req, res) => {
 });
 
 /*Add new Designation*/
-router.post("/create-expense", async (req, res) => {
+router.post("/create-expense", auth, async (req, res) => {
   let expense = await Expense.findOne({
     name: req.body.name,
   });
@@ -30,7 +31,7 @@ router.post("/create-expense", async (req, res) => {
 });
 
 // Update Designation
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let expense = await Expense.findById(req.params.id);
     if (!expense)
@@ -44,7 +45,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete Designation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let expense = await Expense.findByIdAndDelete(req.params.id);
     if (!expense) {

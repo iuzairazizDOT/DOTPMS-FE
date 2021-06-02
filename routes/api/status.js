@@ -3,9 +3,10 @@ const _ = require("lodash");
 const { extend } = require("lodash");
 var router = express.Router();
 const { Status } = require("../../model/status");
+const auth = require("../../middlewares/auth");
 
 /* Get All Designations And Users */
-router.get("/show-status", async (req, res) => {
+router.get("/show-status", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
@@ -14,7 +15,7 @@ router.get("/show-status", async (req, res) => {
 });
 
 /*Add new Designation*/
-router.post("/create-status", async (req, res) => {
+router.post("/create-status", auth, async (req, res) => {
   let status = await Status.findOne({
     name: req.body.name,
   });
@@ -32,7 +33,7 @@ router.post("/create-status", async (req, res) => {
 });
 
 // Update Designation
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let status = await Status.findById(req.params.id);
     console.log(status);
@@ -47,7 +48,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete Designation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let status = await Status.findByIdAndDelete(req.params.id);
     if (!status) {

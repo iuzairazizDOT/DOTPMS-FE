@@ -37,11 +37,14 @@ var upload = multer({
 }).single("image");
 
 /* GET Users */
-router.get("/", async function (req, res, next) {
+router.get("/", auth, async function (req, res, next) {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 100);
   let skipRecords = perPage * (page - 1);
-  let user = await User.find().populate("technology").skip(skipRecords).limit(perPage);
+  let user = await User.find()
+    .populate("technology")
+    .skip(skipRecords)
+    .limit(perPage);
   return res.send(user);
 });
 
@@ -98,7 +101,7 @@ router.post("/login", async (req, res) => {
 });
 
 // Update User
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   let user = await User.findById(req.params.id);
   if (!user) {
     return res.status(400).send("User with given id is not present"); // when there is no id in db
@@ -108,7 +111,7 @@ router.put("/:id", async (req, res) => {
   return res.send(user.technology);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   try {
     let user = await User.findById(req.params.id).populate("technology");
     if (!user) {
@@ -121,7 +124,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // Delete user
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let user = await User.findByIdAndDelete(req.params.id);
     if (!user) {

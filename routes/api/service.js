@@ -3,9 +3,10 @@ const _ = require("lodash");
 const { extend } = require("lodash");
 var router = express.Router();
 const { Service } = require("../../model/services");
+const auth = require("../../middlewares/auth");
 
 /* Get All Designations And Users */
-router.get("/show-service", async (req, res) => {
+router.get("/show-service", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
@@ -14,7 +15,7 @@ router.get("/show-service", async (req, res) => {
 });
 
 /*Add new Designation*/
-router.post("/create-service", async (req, res) => {
+router.post("/create-service", auth, async (req, res) => {
   let service = await Service.findOne({
     name: req.body.name,
   });
@@ -32,7 +33,7 @@ router.post("/create-service", async (req, res) => {
 });
 
 // Update Designation
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let service = await Service.findById(req.params.id);
     console.log(service);
@@ -47,7 +48,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete Designation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let service = await Service.findByIdAndDelete(req.params.id);
     if (!service) {

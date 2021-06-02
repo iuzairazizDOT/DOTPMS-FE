@@ -5,11 +5,10 @@ const mongoose = require("mongoose");
 var router = express.Router();
 const { Tasks } = require("../../model/task");
 const moment = require("moment");
-
-
+const auth = require("../../middlewares/auth");
 
 /* Get Tasks */
-router.get("/show-task", async (req, res) => {
+router.get("/show-task", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
@@ -27,7 +26,7 @@ router.get("/show-task", async (req, res) => {
 });
 
 /*Add new task*/
-router.post("/create-task", async (req, res) => {
+router.post("/create-task", auth, async (req, res) => {
   let tasks = await Tasks.findOne({ name: req.body.name });
   if (tasks) return res.status(400).send("Task With Given Name Already Exists");
   task = new Tasks(req.body);
@@ -42,7 +41,7 @@ router.post("/create-task", async (req, res) => {
 });
 
 // Update Tasks
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let task = await Tasks.findById(req.params.id);
     console.log(task);
@@ -56,7 +55,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete user
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let task = await Tasks.findByIdAndDelete(req.params.id);
     if (!task) {
@@ -68,7 +67,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.get("/project-tasks/:id", async (req, res) => {
+router.get("/project-tasks/:id", auth, async (req, res) => {
   let tasks = await Tasks.find({ project: req.params.id })
     .populate("projects")
     .populate("parentTask")
@@ -81,7 +80,7 @@ router.get("/project-tasks/:id", async (req, res) => {
   return res.send(tasks);
 });
 
-router.get("/parents", async (req, res) => {
+router.get("/parents", auth, async (req, res) => {
   let tasks = await Tasks.find({ parentTask: null })
     .populate("projects")
     .populate("parentTask")
@@ -94,7 +93,7 @@ router.get("/parents", async (req, res) => {
   return res.send(tasks);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   console.log(req.params.id);
   let task = await Tasks.findById(req.params.id)
     .populate("projects")
@@ -117,7 +116,7 @@ router.get("/:id", async (req, res) => {
   return res.send({ task, subTasks });
 });
 
-router.post("/by-employee-project", async (req, res) => {
+router.post("/by-employee-project", auth, async (req, res) => {
   let { empId, projectId } = req.body;
   console.log("body", req.body);
   try {
@@ -135,7 +134,7 @@ router.post("/by-employee-project", async (req, res) => {
   }
 });
 
-router.post("/employee", async (req, res) => {
+router.post("/employee", auth, async (req, res) => {
   let empId = req.body.empId;
   let startDate = moment(req.body.startDate).toDate();
   let endDate = moment(req.body.endDate).toDate();
@@ -145,19 +144,28 @@ router.post("/employee", async (req, res) => {
   console.log("end==", endDate);
   try {
     let result = await Tasks.aggregate([
-      { $project: { name: 1, project: 1, assignedTo: 1,workDone:1 } },
+      { $project: { name: 1, project: 1, assignedTo: 1, workDone: 1 } },
       { $match: { assignedTo: mongoose.Types.ObjectId(empId) } },
-      {$lookup:{
-        from:"timesheets",
-        let: { taskId: "$_id" },
-        pipeline:[
-          {
-            $match:{$expr:{$and:[{$eq:["$$taskId","$task"]},{$gte:["$date",startDate]},{$lte:["$date",endDate]}]} },
-          },
-          
-        ],
-        as:"timesheet",
-      }},
+      {
+        $lookup: {
+          from: "timesheets",
+          let: { taskId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$$taskId", "$task"] },
+                    { $gte: ["$date", startDate] },
+                    { $lte: ["$date", endDate] },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "timesheet",
+        },
+      },
       { $group: { _id: "$project", tasks: { $push: "$$ROOT" } } },
       {
         $lookup: {

@@ -3,9 +3,10 @@ const _ = require("lodash");
 const { extend } = require("lodash");
 var router = express.Router();
 const { UserProfile } = require("../../model/userProfile");
+const auth = require("../../middlewares/auth");
 
 /* Get All User Profile And Users */
-router.get("/show-profile", async (req, res) => {
+router.get("/show-profile", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
@@ -20,7 +21,7 @@ router.get("/show-profile", async (req, res) => {
 /*Add new User Profile*/
 
 // Update Designation
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let userprofile = await UserProfile.findById(req.params.id);
     console.log(userprofile);
@@ -35,7 +36,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // Delete Designation
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let userprofile = await UserProfile.findByIdAndDelete(req.params.id);
     if (!userprofile) {

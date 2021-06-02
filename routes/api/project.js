@@ -5,11 +5,12 @@ const _ = require("lodash");
 var moment = require("moment");
 const  Mongoose  = require("mongoose");
 const { Project } = require("../../model/project");
+const auth = require("../../middlewares/auth");
 
 /*Get Projects*/
-router.get("/show-projects", async (req, res) => {
+router.get("/show-projects", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
-  let perPage = Number(req.query.perPage ? req.query.perPage : 20);
+  let perPage = Number(req.query.perPage ? req.query.perPage : 100);
   let status = req.query.status ? req.query.status : "";
   let platForm = req.query.platForm ? req.query.platForm : "";
   let technology = req.query.technology ? req.query.technology : "";
@@ -60,7 +61,8 @@ router.get("/show-projects", async (req, res) => {
 });
 
 /* Add New Project . */
-router.post("/create-project", async (req, res) => {
+router.post("/create-project", auth, async (req, res) => {
+  console.log("kkkkkkkk", req.body);
   let projects = await Project.findOne({ name: req.body.name });
   if (projects)
     return res.status(400).send("Project With Given Name Already Exsists");
@@ -68,6 +70,7 @@ router.post("/create-project", async (req, res) => {
   project
     .save()
     .then((resp) => {
+      console.log("kkkkkkkk 200", req.body);
       return res.send(resp);
     })
     .catch((err) => {
@@ -76,7 +79,7 @@ router.post("/create-project", async (req, res) => {
 });
 
 // Update Project
-router.put("/:id", async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     let project = await Project.findById(req.params.id);
     console.log(project);
@@ -85,13 +88,14 @@ router.put("/:id", async (req, res) => {
     project = extend(project, req.body);
     await project.save();
     return res.send(project);
-  } catch {
+  } catch(err) {
+    console.log("error",err);
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
 });
 
 // Delete user
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     let project = await Project.findByIdAndDelete(req.params.id);
     if (!project) {
@@ -103,7 +107,7 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-router.post("/whereEmployee/:id", async (req, res) => {
+router.post("/whereEmployee/:id", auth, async (req, res) => {
   try {
     console.log("emp id", req.params.id);
     let project = await Project.find({
