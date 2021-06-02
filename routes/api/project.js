@@ -8,7 +8,7 @@ const { Project } = require("../../model/project");
 /*Get Projects*/
 router.get("/show-projects", async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
-  let perPage = Number(req.query.perPage ? req.query.perPage : 20);
+  let perPage = Number(req.query.perPage ? req.query.perPage : 100);
   let status = req.query.status ? req.query.status : "";
   let platForm = req.query.platForm ? req.query.platForm : "";
   let technology = req.query.technology ? req.query.technology : "";
@@ -84,7 +84,8 @@ router.put("/:id", async (req, res) => {
     project = extend(project, req.body);
     await project.save();
     return res.send(project);
-  } catch {
+  } catch(err) {
+    console.log("error",err);
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
 });
