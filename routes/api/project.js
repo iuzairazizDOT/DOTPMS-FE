@@ -170,7 +170,7 @@ router.get("/report", async (req, res) => {
     // console.log("emp id", req.params.id);
     
     let project = await Project.aggregate([
-      // { $match: { _id: Mongoose.Types.ObjectId("60ae89c3fb2ff83cfd87f91f") } },
+      // { $match: { _id: Mongoose.Types.ObjectId("60a676108408824bedad262b") } },
       {
         $lookup:
         {
@@ -201,7 +201,7 @@ router.get("/report", async (req, res) => {
             as:"tasks",        
         }
       },
-      {$unwind:"$tasks"},
+      {$unwind:{path:"$tasks",preserveNullAndEmptyArrays: true}},
       {$addFields:{actualHrs:"$tasks.projectHrs",workDone:"$tasks.workedDone"}},
       {$project:{tasks:0}}
 
