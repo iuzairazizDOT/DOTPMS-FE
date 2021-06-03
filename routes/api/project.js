@@ -167,10 +167,10 @@ router.get("/project-with-tasks/:projectId", async (req, res) => {
 
 router.get("/report", async (req, res) => {
   try {
-    console.log("emp id", req.params.id);
+    // console.log("emp id", req.params.id);
     
     let project = await Project.aggregate([
-      // { $match: { _id: Mongoose.Types.ObjectId(req.params.projectId) } },
+      // { $match: { _id: Mongoose.Types.ObjectId("60ae89c3fb2ff83cfd87f91f") } },
       {
         $lookup:
         {
@@ -195,15 +195,15 @@ router.get("/report", async (req, res) => {
               {$unwind:"$actualHours"},
               {$addFields:{actualHrs:"$actualHours.hours"}},
               {$project:{actualHours:0}},
-              {$group:{_id:null,projectHrs:{$sum:"$actualHrs"},workedDone:{$sum:"$workDone"}}},
+              {$group:{_id:null,projectHrs:{$sum:"$actualHrs"},workedDone:{$sum:{$divide:[{$multiply:["$workDone","$projectRatio"]},100]}}}},
               
             ],
             as:"tasks",        
         }
       },
-      // {$unwind:"$tasks"},
-      // {$addFields:{actualHrs:"$tasks.projectHrs",workDone:"$tasks.workedDone"}},
-      // {$project:{tasks:0}}
+      {$unwind:"$tasks"},
+      {$addFields:{actualHrs:"$tasks.projectHrs",workDone:"$tasks.workedDone"}},
+      {$project:{tasks:0}}
 
       
     ]);
