@@ -26,7 +26,7 @@ const projectScheme = mongoose.Schema(
     phase: [
       {
         phasename: String,
-        estTime: String,
+        estTime: Number,
       },
     ],
     technology: {
