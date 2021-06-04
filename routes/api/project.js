@@ -279,7 +279,7 @@ router.get("/project-with-tasks/:projectId", async (req, res) => {
                 as: "actualHours",
               },
             },
-            { $unwind: "$actualHours" },
+            { $unwind: {path:"$actualHours",preserveNullAndEmptyArrays:true }},
             { $addFields: { actualHrs: "$actualHours.hours" } },
             { $project: { actualHours: 0 } },
           ],
@@ -420,7 +420,7 @@ router.get("/report", async (req, res) => {
                 as: "actualHours",
               },
             },
-            { $unwind: "$actualHours" },
+            { $unwind: {path:"$actualHours", preserveNullAndEmptyArrays:true}},
             { $addFields: { actualHrs: "$actualHours.hours" } },
             { $project: { actualHours: 0 } },
             {
