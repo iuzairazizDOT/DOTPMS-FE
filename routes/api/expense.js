@@ -1,6 +1,7 @@
 var express = require("express");
 const _ = require("lodash");
 const { extend } = require("lodash");
+var moment = require("moment");
 var router = express.Router();
 const { Expense } = require("../../model/expense");
 const auth = require("../../middlewares/auth");
@@ -8,9 +9,22 @@ const auth = require("../../middlewares/auth");
 /* Get All Designations And Users */
 router.get("/show-expense", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
-  let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+  let perPage = Number(req.query.perPage ? req.query.perPage : 100);
+  let startDate = req.query.startDate ? req.query.startDate : "";
+  let requestObject = {};
+  if (startDate === "null" || startDate === "") {
+    let startdate = {};
+    startdate1 = "1-1-1990";
+    startdate.$gte = moment(startdate1).startOf("day");
+    requestObject.date = startdate;
+  } else {
+    requestObject.date = moment(startDate).format("YYYY-MM-DD");
+  }
   let skipRecords = perPage * (page - 1);
-  let expense = await Expense.find().skip(skipRecords).limit(perPage);
+  let expense = await Expense.find(requestObject)
+    .skip(skipRecords)
+    .limit(perPage);
+  console.log(requestObject);
   return res.send(expense);
 });
 

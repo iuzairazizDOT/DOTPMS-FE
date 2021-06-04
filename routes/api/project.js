@@ -33,13 +33,17 @@ router.get("/show-projects", auth, async (req, res) => {
   } else {
     null;
   }
-
-  if (startDate) {
+  if (startDate === "null" || startDate === "") {
+    console.log("if", startDate);
+    let startdate = {};
+    startdate1 = "1-1-1990";
+    startdate.$gte = moment(startdate1).startOf("day");
+    requestObject.cStartDate = startdate;
+  } else {
+    console.log("else", startDate);
     let startdate = {};
     startdate.$gte = moment(startDate).startOf("day");
     requestObject.cStartDate = startdate;
-  } else {
-    null;
   }
 
   let projects = await Project.find(requestObject)
@@ -87,8 +91,8 @@ router.put("/:id", auth, async (req, res) => {
     project = extend(project, req.body);
     await project.save();
     return res.send(project);
-  } catch(err) {
-    console.log("error",err);
+  } catch (err) {
+    console.log("error", err);
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
 });

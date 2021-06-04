@@ -41,7 +41,27 @@ router.get("/", auth, async function (req, res, next) {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 100);
   let skipRecords = perPage * (page - 1);
-  let user = await User.find()
+  let technology = req.query.technology ? req.query.technology : "";
+  let role = req.query.role ? req.query.role : "";
+  let minSalary = req.query.minSalary ? req.query.minSalary : "";
+  let maxSalary = req.query.maxSalary ? req.query.maxSalary : "";
+  let requestObject = {};
+  if (technology) {
+    requestObject.technology = { $all: [`${technology}`] };
+  } else {
+    null;
+  }
+  if (role) {
+    requestObject.userRole = role;
+  } else {
+    null;
+  }
+  if (minSalary && maxSalary) {
+    requestObject.salary = { $gte: minSalary, $lte: maxSalary };
+  } else {
+    null;
+  }
+  let user = await User.find(requestObject)
     .populate("technology")
     .skip(skipRecords)
     .limit(perPage);
