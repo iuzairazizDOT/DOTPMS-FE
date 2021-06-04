@@ -3,6 +3,7 @@ const { extend } = require("lodash");
 var router = express.Router();
 const _ = require("lodash");
 var moment = require("moment");
+const Mongoose = require("mongoose");
 const { Project } = require("../../model/project");
 const auth = require("../../middlewares/auth");
 
@@ -116,6 +117,343 @@ router.post("/whereEmployee/:id", auth, async (req, res) => {
     let project = await Project.find({
       assignedUser: { _id: req.params.id },
     });
+    if (!project) {
+      return res.status(404).send("Project with given id is not present"); // when there is no id in db
+    }
+    return res.send(project); // when everything is okay
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("invalid id"); // when id is inavlid
+  }
+});
+
+router.get("/project-with-tasks/:projectId", async (req, res) => {
+  try {
+    console.log("emp id", req.params.id);
+
+    let project = await Project.aggregate([
+      { $match: { _id: Mongoose.Types.ObjectId(req.params.projectId) } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedUser",
+          foreignField: "_id",
+          as: "assignedUser",
+        },
+      },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "client",
+          foreignField: "_id",
+          as: "client",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "projectManager",
+          foreignField: "_id",
+          as: "projectManager",
+        },
+      },
+      {
+        $lookup: {
+          from: "platforms",
+          localField: "platform",
+          foreignField: "_id",
+          as: "platform",
+        },
+      },
+      {
+        $lookup: {
+          from: "services",
+          localField: "service",
+          foreignField: "_id",
+          as: "service",
+        },
+      },
+      {
+        $lookup: {
+          from: "natures",
+          localField: "nature",
+          foreignField: "_id",
+          as: "nature",
+        },
+      },
+      {
+        $lookup: {
+          from: "technologies",
+          localField: "technology",
+          foreignField: "_id",
+          as: "technology",
+        },
+      },
+      {
+        $lookup: {
+          from: "currencies",
+          localField: "currency",
+          foreignField: "_id",
+          as: "currency",
+        },
+      },
+      {
+        $lookup: {
+          from: "status",
+          localField: "status",
+          foreignField: "_id",
+          as: "status",
+        },
+      },
+      { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
+      {
+        $unwind: { path: "$projectManager", preserveNullAndEmptyArrays: true },
+      },
+      { $unwind: { path: "$platform", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$service", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$nature", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$technology", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$currency", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$status", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "tasks",
+          let: { projectId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$$projectId", "$project"] },
+                    { $eq: ["$parentTask", null] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "assignedTo",
+                foreignField: "_id",
+                as: "assignedTo",
+              },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "teamLead",
+                foreignField: "_id",
+                as: "teamLead",
+              },
+            },
+            {
+              $unwind: { path: "$teamLead", preserveNullAndEmptyArrays: true },
+            },
+            {
+              $lookup: {
+                from: "users",
+                localField: "approvedBy",
+                foreignField: "_id",
+                as: "approvedBy",
+              },
+            },
+            {
+              $unwind: {
+                path: "$approvedBy",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $lookup: {
+                from: "timesheets",
+                let: { taskID: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$$taskID", "$task"] },
+                          { $ne: ["$workedHrs", null] },
+                        ],
+                      },
+                    },
+                  },
+                  { $group: { _id: null, hours: { $sum: "$workedHrs" } } },
+                ],
+                as: "actualHours",
+              },
+            },
+            { $unwind: {path:"$actualHours",preserveNullAndEmptyArrays:true }},
+            { $addFields: { actualHrs: "$actualHours.hours" } },
+            { $project: { actualHours: 0 } },
+          ],
+          as: "tasks",
+        },
+      },
+    ]);
+    if (!project) {
+      return res.status(404).send("Project with given id is not present"); // when there is no id in db
+    }
+    return res.send(project); // when everything is okay
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("invalid id"); // when id is inavlid
+  }
+});
+
+router.get("/report", async (req, res) => {
+  try {
+    // console.log("emp id", req.params.id);
+
+    let project = await Project.aggregate([
+      // { $match: { _id: Mongoose.Types.ObjectId("60a676108408824bedad262b") } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedUser",
+          foreignField: "_id",
+          as: "assignedUser",
+        },
+      },
+      {
+        $lookup: {
+          from: "clients",
+          localField: "client",
+          foreignField: "_id",
+          as: "client",
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "projectManager",
+          foreignField: "_id",
+          as: "projectManager",
+        },
+      },
+      {
+        $lookup: {
+          from: "platforms",
+          localField: "platform",
+          foreignField: "_id",
+          as: "platform",
+        },
+      },
+      {
+        $lookup: {
+          from: "services",
+          localField: "service",
+          foreignField: "_id",
+          as: "service",
+        },
+      },
+      {
+        $lookup: {
+          from: "natures",
+          localField: "nature",
+          foreignField: "_id",
+          as: "nature",
+        },
+      },
+      {
+        $lookup: {
+          from: "technologies",
+          localField: "technology",
+          foreignField: "_id",
+          as: "technology",
+        },
+      },
+      {
+        $lookup: {
+          from: "currencies",
+          localField: "currency",
+          foreignField: "_id",
+          as: "currency",
+        },
+      },
+      {
+        $lookup: {
+          from: "status",
+          localField: "status",
+          foreignField: "_id",
+          as: "status",
+        },
+      },
+      { $unwind: { path: "$client", preserveNullAndEmptyArrays: true } },
+      {
+        $unwind: { path: "$projectManager", preserveNullAndEmptyArrays: true },
+      },
+      { $unwind: { path: "$platform", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$service", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$nature", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$technology", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$currency", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$status", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "tasks",
+          let: { projectId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$$projectId", "$project"] },
+                    { $eq: ["$parentTask", null] },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "timesheets",
+                let: { taskID: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$$taskID", "$task"] },
+                          { $ne: ["$workedHrs", null] },
+                        ],
+                      },
+                    },
+                  },
+                  { $group: { _id: null, hours: { $sum: "$workedHrs" } } },
+                ],
+                as: "actualHours",
+              },
+            },
+            { $unwind: {path:"$actualHours", preserveNullAndEmptyArrays:true}},
+            { $addFields: { actualHrs: "$actualHours.hours" } },
+            { $project: { actualHours: 0 } },
+            {
+              $group: {
+                _id: null,
+                projectHrs: { $sum: "$actualHrs" },
+                workedDone: {
+                  $sum: {
+                    $divide: [
+                      { $multiply: ["$workDone", "$projectRatio"] },
+                      100,
+                    ],
+                  },
+                },
+              },
+            },
+          ],
+          as: "tasks",
+        },
+      },
+      { $unwind: { path: "$tasks", preserveNullAndEmptyArrays: true } },
+      {
+        $addFields: {
+          actualHrs: "$tasks.projectHrs",
+          workDone: "$tasks.workedDone",
+        },
+      },
+      { $project: { tasks: 0 } },
+    ]);
     if (!project) {
       return res.status(404).send("Project with given id is not present"); // when there is no id in db
     }

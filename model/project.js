@@ -26,7 +26,7 @@ const projectScheme = mongoose.Schema(
     phase: [
       {
         phasename: String,
-        estTime: String,
+        estTime: Number,
       },
     ],
     technology: {
@@ -39,12 +39,6 @@ const projectScheme = mongoose.Schema(
       ref: "Nature",
     },
 
-    tasks: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Tasks",
-      },
-    ],
     client: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Client",
