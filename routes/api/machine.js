@@ -10,18 +10,20 @@ router.get("/show-machine", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
-  let machine = await Machine.find().populate("resourceName");
+  let machine = await Machine.find()
+    .populate("resourceName")
+    .populate("Accessory");
   return res.send(machine);
 });
 
 /*Add new Designation*/
-router.post("/create-machine", auth, async (req, res) => {
+router.post("/create-machine", async (req, res) => {
   let machine = await Machine.findOne({
     name: req.body.name,
   });
   if (machine)
-    return res.status(400).send("machine With Given Name Already Exsists");
-  machine = new Client(req.body);
+    return res.status(400).send("Machine With Given Name Already Exsists");
+  machine = new Machine(req.body);
   machine
     .save()
     .then((resp) => {
@@ -36,13 +38,14 @@ router.post("/create-machine", auth, async (req, res) => {
 router.put("/:id", auth, async (req, res) => {
   try {
     let machine = await Machine.findById(req.params.id);
-    console.log(client);
+    console.log(machine);
     if (!machine)
       return res.status(400).send("machine with given id is not present");
     machine = extend(machine, req.body);
-    await client.save();
+    await machine.save();
     return res.send(machine);
-  } catch {
+  } catch (err) {
+    console.log(err);
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
 });

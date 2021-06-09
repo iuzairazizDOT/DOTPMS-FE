@@ -3,15 +3,19 @@ const mongoose = require("mongoose");
 const machineScheme = mongoose.Schema(
   {
     name: String,
+    serialNo: String,
+    machineNo: Number,
     Storage: String,
     Memory: String,
     Processor: String,
     Graphics: String,
-    Accessories: String,
+    Accessory: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Accessories",
+      },
+    ],
     Status: String,
-    Display: String,
-    Battery: String,
-    Charger: String,
     Notes: String,
     resourceName: {
       type: mongoose.Schema.Types.ObjectId,
