@@ -26,6 +26,8 @@ var apiStatusRouter = require("./routes/api/status");
 var apiExpenseCategoryRouter = require("./routes/api/expenseCategory");
 var apiExpenseRouter = require("./routes/api/expense");
 var apiCommentRouter = require("./routes/api/comments");
+var apiMachineRouter = require("./routes/api/machine");
+var apiAccessoriesRouter = require("./routes/api/accessories");
 
 var app = express();
 
@@ -58,6 +60,8 @@ app.use("/status", apiStatusRouter);
 app.use("/expense-category", apiExpenseCategoryRouter);
 app.use("/expense", apiExpenseRouter);
 app.use("/comment", apiCommentRouter);
+app.use("/machine", apiMachineRouter);
+app.use("/accessory", apiAccessoriesRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
