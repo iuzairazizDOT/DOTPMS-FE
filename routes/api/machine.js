@@ -30,6 +30,7 @@ router.post("/create-machine", async (req, res) => {
       return res.send(resp);
     })
     .catch((err) => {
+      console.log(err);
       return res.status(500).send({ error: err });
     });
 });

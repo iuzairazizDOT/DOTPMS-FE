@@ -12,7 +12,10 @@ const userSchema = mongoose.Schema(
     password: String,
     status: String,
     joiningDate: String,
-    machineNo: Number,
+    machineNo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Machine",
+    },
     workingDays: Number,
     userRole: String,
     image: String,

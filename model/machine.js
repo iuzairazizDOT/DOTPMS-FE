@@ -9,6 +9,7 @@ const machineScheme = mongoose.Schema(
     Memory: String,
     Processor: String,
     Graphics: String,
+    Ownership: String,
     Accessory: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -17,10 +18,6 @@ const machineScheme = mongoose.Schema(
     ],
     Status: String,
     Notes: String,
-    resourceName: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
   },
   { timestamps: true }
 );

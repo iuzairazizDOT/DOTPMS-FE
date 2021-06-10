@@ -63,6 +63,7 @@ router.get("/", auth, async function (req, res, next) {
   }
   let user = await User.find(requestObject)
     .populate("technology")
+    .populate("machineNo", "machineNo")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(user);
