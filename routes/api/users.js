@@ -155,9 +155,8 @@ router.put("/update-user/:id", auth, async (req, res) => {
 
 router.get("/:id", auth, async (req, res) => {
   try {
-    let user = await User.findById(req.params.id)
-      .populate("technology")
-      .populate("machineNo", "machineNo");
+    let user = await User.findById(req.params.id).populate("technology");
+
     if (!user) {
       return res.status(400).send("User with given id is not present"); // when there is no id in db
     }

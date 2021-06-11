@@ -16,6 +16,19 @@ router.get("/show-machine", auth, async (req, res) => {
   return res.send(machine);
 });
 
+router.get("/single-machine/:machineId", async (req, res) => {
+  try {
+    let machine = await Machine.findById(req.params.machineId);
+    if (!machine) {
+      return res.status(404).send("Project with given id is not present"); // when there is no id in db
+    }
+    return res.send(machine); // when everything is okay
+  } catch (err) {
+    console.log(err);
+    return res.status(400).send("invalid id"); // when id is inavlid
+  }
+});
+
 /*Add new Designation*/
 router.post("/create-machine", async (req, res) => {
   let machine = await Machine.findOne({
