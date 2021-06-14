@@ -156,6 +156,7 @@ router.post("/employee", auth, async (req, res) => {
                 $expr: {
                   $and: [
                     { $eq: ["$$taskId", "$task"] },
+                    { $eq: [mongoose.Types.ObjectId(empId), "$employee"] },
                     { $gte: ["$date", startDate] },
                     { $lte: ["$date", endDate] },
                   ],
