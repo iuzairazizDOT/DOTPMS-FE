@@ -283,7 +283,12 @@ router.get("/project-with-tasks/:projectId", async (req, res) => {
                 as: "actualHours",
               },
             },
-            { $unwind: {path:"$actualHours",preserveNullAndEmptyArrays:true }},
+            {
+              $unwind: {
+                path: "$actualHours",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
             { $addFields: { actualHrs: "$actualHours.hours" } },
             { $project: { actualHours: 0 } },
           ],
@@ -309,12 +314,209 @@ router.get("/report", async (req, res) => {
       // { $match: { _id: Mongoose.Types.ObjectId("60a676108408824bedad262b") } },
       {
         $lookup: {
+          from: "expenses",
+          pipeline: [
+            { $match: { _id: { $exists: true } } },
+            { $group: { _id: null, totalExpenses: { $sum: "$cost" } } },
+            { $project: { _id: 0 } },
+          ],
+          as: "expensesSum",
+        },
+      },
+      { $unwind: { path: "$expensesSum", preserveNullAndEmptyArrays: true } },
+      { $addFields: { expensesSum: "$expensesSum.totalExpenses" } },
+      {
+        $lookup: {
           from: "users",
-          localField: "assignedUser",
-          foreignField: "_id",
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $eq: ["$userRole", "Admin"] },
+                    { $eq: ["$userRole", "HR"] },
+                    { $eq: ["$userRole", "CEO"] },
+                  ],
+                },
+              },
+            },
+            { $group: { _id: null, expensedUsersTotal: { $sum: "$salary" } } },
+            // { $project: { _id: 0 } },
+          ],
+          as: "expensedUsersTotal",
+        },
+      },
+      {
+        $unwind: {
+          path: "$expensedUsersTotal",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          expensedUsersTotal: "$expensedUsersTotal.expensedUsersTotal",
+        },
+      },
+      {
+        $addFields: {
+          totalExpenses: { $sum: ["$expensedUsersTotal", "$expensesSum"] },
+        },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $ne: ["$userRole", "Admin"] },
+                    { $ne: ["$userRole", "HR"] },
+                    { $ne: ["$userRole", "CEO"] },
+                  ],
+                },
+              },
+            },
+            { $count: "numberOfEmployees" },
+          ],
+          as: "noOfEmployees",
+        },
+      },
+      { $unwind: { path: "$noOfEmployees", preserveNullAndEmptyArrays: true } },
+      { $addFields: { noOfEmployees: "$noOfEmployees.numberOfEmployees" } },
+      {
+        $addFields: {
+          perEmployeeExpense: { $divide: ["$totalExpenses", "$noOfEmployees"] },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          let: {
+            user: "$assignedUser",
+            empExpense: "$perEmployeeExpense",
+            pId: "$_id",
+          },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $in: ["$_id", "$$user"],
+                },
+              },
+            },
+            {
+              $addFields: {
+                perHourSalary: {
+                  $divide: [
+                    {
+                      $divide: [
+                        { $sum: ["$salary", "$$empExpense"] },
+                        { $multiply: ["$workingDays", 4.3] },
+                      ],
+                    },
+                    "$workingHrs",
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "tasks",
+                let: { projectId: "$$pId", userId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$$projectId", "$project"] },
+                          { $in: ["$$userId", "$assignedTo"] },
+                        ],
+                      },
+                    },
+                  },
+                  {
+                    $lookup: {
+                      from: "timesheets",
+                      let: { taskId: "$_id", uId: "$$userId" },
+                      pipeline: [
+                        {
+                          $match: {
+                            $expr: {
+                              $and: [
+                                { $eq: ["$$taskId", "$task"] },
+                                { $eq: ["$$uId", "$employee"] },
+                                { $ne: ["$workedHrs", null] },
+                              ],
+                            },
+                          },
+                        },
+                        {
+                          $group: { _id: null, hours: { $sum: "$workedHrs" } },
+                        },
+                      ],
+                      as: "timesheets",
+                    },
+                  },
+                  {
+                    $unwind: {
+                      path: "$timesheets",
+                      preserveNullAndEmptyArrays: true,
+                    },
+                  },
+                  {
+                    $group: {
+                      _id: null,
+                      allTaskHrs: { $sum: "$timesheets.hours" },
+                      tasks: {
+                        $push: {
+                          workDone: {
+                            $divide: [
+                              { $multiply: ["$workDone", "$projectRatio"] },
+                              100,
+                            ],
+                          },
+                        },
+                      },
+                    },
+                  },
+                  { $project: { _id: 0 } },
+                ],
+                as: "totalProjectHrs",
+              },
+            },
+            {
+              $unwind: {
+                path: "$totalProjectHrs",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
+            {
+              $addFields: {
+                totalProjectHrs: "$totalProjectHrs.allTaskHrs",
+              },
+            },
+            {
+              $project: {
+                totalProjectHrs: 1,
+                perHourSalary: 1,
+                resourceExpense: {
+                  $multiply: ["$perHourSalary", "$totalProjectHrs"],
+                },
+              },
+            },
+            {
+              $group: {
+                _id: null,
+                allResourcesExpense: { $sum: "$resourceExpense" },
+              },
+            },
+          ],
           as: "assignedUser",
         },
       },
+      { $unwind: { path: "$assignedUser", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "clients",
@@ -424,7 +626,12 @@ router.get("/report", async (req, res) => {
                 as: "actualHours",
               },
             },
-            { $unwind: {path:"$actualHours", preserveNullAndEmptyArrays:true}},
+            {
+              $unwind: {
+                path: "$actualHours",
+                preserveNullAndEmptyArrays: true,
+              },
+            },
             { $addFields: { actualHrs: "$actualHours.hours" } },
             { $project: { actualHours: 0 } },
             {
@@ -452,7 +659,7 @@ router.get("/report", async (req, res) => {
           workDone: "$tasks.workedDone",
         },
       },
-      { $project: { tasks: 0 } },
+      { $project: { tasks: 0, phase: 0 } },
     ]);
     if (!project) {
       return res.status(404).send("Project with given id is not present"); // when there is no id in db
