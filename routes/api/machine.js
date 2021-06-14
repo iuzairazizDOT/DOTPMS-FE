@@ -18,7 +18,9 @@ router.get("/show-machine", auth, async (req, res) => {
 
 router.get("/single-machine/:machineId", async (req, res) => {
   try {
-    let machine = await Machine.findById(req.params.machineId);
+    let machine = await Machine.findById(req.params.machineId)
+      .populate("resourceName")
+      .populate("Accessory", "name");
     if (!machine) {
       return res.status(404).send("Project with given id is not present"); // when there is no id in db
     }
