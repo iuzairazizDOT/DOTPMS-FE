@@ -63,6 +63,7 @@ router.get("/", auth, async function (req, res, next) {
   }
   let user = await User.find(requestObject)
     .populate("technology")
+    // .populate("machineNo", "machineNo")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(user);
@@ -127,13 +128,47 @@ router.put("/:id", auth, async (req, res) => {
     return res.status(400).send("User with given id is not present"); // when there is no id in db
   }
   user.technology = req.body.technology;
+
   user.save();
   return res.send(user.technology);
+});
+
+router.put("/update-password/:id", auth, async (req, res) => {
+  let user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(400).send("User with given id is not present"); // when there is no id in db
+  }
+  user.password = req.body.password;
+  await user.generateHashedPassword();
+  await user.save();
+  return res.send(user.password);
+});
+
+router.put("/update-user/:id", auth, async (req, res) => {
+  let user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(400).send("User with given id is not present"); // when there is no id in db
+  }
+  user.name = req.body.name;
+  user.email = req.body.email;
+  user.gender = req.body.gender;
+  user.status = req.body.status;
+  user.joiningDate = req.body.joiningDate;
+  user.password = req.body.password;
+  user.salary = req.body.salary;
+  user.workingHrs = req.body.workingHrs;
+  user.machineNo = req.body.machineNo;
+  user.workingDays = req.body.workingDays;
+  user.userRole = req.body.userRole;
+  await user.generateHashedPassword();
+  await user.save();
+  return res.send(user);
 });
 
 router.get("/:id", auth, async (req, res) => {
   try {
     let user = await User.findById(req.params.id).populate("technology");
+
     if (!user) {
       return res.status(400).send("User with given id is not present"); // when there is no id in db
     }

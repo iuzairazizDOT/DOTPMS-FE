@@ -11,15 +11,19 @@ const projectScheme = mongoose.Schema(
     estHrs: Number,
     remarks: String,
     workdone: String,
-    cost: String,
+    cost: Number,
     orderNum: String,
     Rprofit: {
-      type : Number,
-      default: 0
+      type: Number,
+      default: 0,
     },
     Pdeduction: {
-      type : Number,
-      default: 0
+      type: Number,
+      default: 0,
+    },
+    otherDeduction: {
+      type: Number,
+      default: 0,
     },
     percentage: String,
     fCost: String,
