@@ -11,7 +11,7 @@ const projectScheme = mongoose.Schema(
     estHrs: Number,
     remarks: String,
     workdone: String,
-    cost: String,
+    cost: Number,
     orderNum: String,
     Rprofit: {
       type: Number,
