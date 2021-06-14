@@ -320,16 +320,64 @@ router.get("/report", async (req, res) => {
             { $group: { _id: null, totalExpenses: { $sum: "$cost" } } },
             { $project: { _id: 0 } },
           ],
-          as: "expensesTotal",
+          as: "expensesSum",
         },
       },
-      { $unwind: { path: "$expensesTotal", preserveNullAndEmptyArrays: true } },
-      { $addFields: { expensesTotal: "$expensesTotal.totalExpenses" } },
+      { $unwind: { path: "$expensesSum", preserveNullAndEmptyArrays: true } },
+      { $addFields: { expensesSum: "$expensesSum.totalExpenses" } },
       {
         $lookup: {
           from: "users",
           pipeline: [
-            { $match: { _id: { $exists: true } } },
+            {
+              $match: {
+                $expr: {
+                  $or: [
+                    { $eq: ["$userRole", "Admin"] },
+                    { $eq: ["$userRole", "HR"] },
+                    { $eq: ["$userRole", "CEO"] },
+                  ],
+                },
+              },
+            },
+            { $group: { _id: null, expensedUsersTotal: { $sum: "$salary" } } },
+            // { $project: { _id: 0 } },
+          ],
+          as: "expensedUsersTotal",
+        },
+      },
+      {
+        $unwind: {
+          path: "$expensedUsersTotal",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $addFields: {
+          expensedUsersTotal: "$expensedUsersTotal.expensedUsersTotal",
+        },
+      },
+      {
+        $addFields: {
+          totalExpenses: { $sum: ["$expensedUsersTotal", "$expensesSum"] },
+        },
+      },
+
+      {
+        $lookup: {
+          from: "users",
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $ne: ["$userRole", "Admin"] },
+                    { $ne: ["$userRole", "HR"] },
+                    { $ne: ["$userRole", "CEO"] },
+                  ],
+                },
+              },
+            },
             { $count: "numberOfEmployees" },
           ],
           as: "noOfEmployees",
@@ -339,7 +387,7 @@ router.get("/report", async (req, res) => {
       { $addFields: { noOfEmployees: "$noOfEmployees.numberOfEmployees" } },
       {
         $addFields: {
-          perEmployeeExpense: { $divide: ["$expensesTotal", "$noOfEmployees"] },
+          perEmployeeExpense: { $divide: ["$totalExpenses", "$noOfEmployees"] },
         },
       },
       {
@@ -468,6 +516,7 @@ router.get("/report", async (req, res) => {
           as: "assignedUser",
         },
       },
+      { $unwind: { path: "$assignedUser", preserveNullAndEmptyArrays: true } },
       {
         $lookup: {
           from: "clients",
