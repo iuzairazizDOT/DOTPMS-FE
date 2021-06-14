@@ -14,6 +14,11 @@ router.get("/show-history", auth, async (req, res) => {
   return res.send(history);
 });
 
+router.get("/show-single-history/:machineId", auth, async (req, res) => {
+  let history = await History.find({ docId: req.params.machineId });
+  return res.send(history);
+});
+
 /*Add new Designation*/
 router.post("/create-history", auth, async (req, res) => {
   history = new History(req.body);

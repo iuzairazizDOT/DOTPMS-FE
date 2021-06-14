@@ -63,7 +63,7 @@ router.get("/", auth, async function (req, res, next) {
   }
   let user = await User.find(requestObject)
     .populate("technology")
-    // .populate("machineNo", "machineNo")
+    .populate("machineNo", "machineNo")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(user);
@@ -167,8 +167,9 @@ router.put("/update-user/:id", auth, async (req, res) => {
 
 router.get("/:id", auth, async (req, res) => {
   try {
-    let user = await User.findById(req.params.id).populate("technology");
-
+    let user = await User.findById(req.params.id)
+      .populate("technology")
+      .populate("machineNo", "machineNo");
     if (!user) {
       return res.status(400).send("User with given id is not present"); // when there is no id in db
     }
