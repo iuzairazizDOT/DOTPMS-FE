@@ -28,6 +28,7 @@ var apiExpenseRouter = require("./routes/api/expense");
 var apiCommentRouter = require("./routes/api/comments");
 var apiMachineRouter = require("./routes/api/machine");
 var apiAccessoriesRouter = require("./routes/api/accessories");
+var apiHistoryRouter = require("./routes/api/history");
 
 var app = express();
 
@@ -62,6 +63,7 @@ app.use("/expense", apiExpenseRouter);
 app.use("/comment", apiCommentRouter);
 app.use("/machine", apiMachineRouter);
 app.use("/accessory", apiAccessoriesRouter);
+app.use("/history", apiHistoryRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
