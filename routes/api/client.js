@@ -4,7 +4,6 @@ const { extend } = require("lodash");
 var router = express.Router();
 const { Client } = require("../../model/client");
 const auth = require("../../middlewares/auth");
-const Mongoose = require("mongoose");
 const { Project } = require("../../model/project");
 
 /* Get All Designations And Users */
