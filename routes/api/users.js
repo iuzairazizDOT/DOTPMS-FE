@@ -180,7 +180,10 @@ router.get("/:id", auth, async (req, res) => {
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
   try {
-    tasks = await Tasks.find({ assignedTo: { _id: req.params.id } });
+    tasks = await Tasks.find({ assignedTo: { _id: req.params.id } })
+      .populate("project")
+      .populate("teamLead")
+      .populate("addedBy");
   } catch (error) {
     return res
       .status(404)
