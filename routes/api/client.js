@@ -22,7 +22,7 @@ router.get("/:id", auth, async (req, res) => {
   let client;
   let projects;
   try {
-    client = await Client.findById(req.params.id);
+    client = await Client.findById(req.params.id).populate("country");
     if (!client)
       return res.status(400).send("client with given id is not present");
   } catch {
