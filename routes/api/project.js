@@ -516,10 +516,15 @@ router.get("/report", async (req, res) => {
               },
             },
           ],
-          as: "assignedUser",
+          as: "projectResourcesExpense",
         },
       },
-      { $unwind: { path: "$assignedUser", preserveNullAndEmptyArrays: true } },
+      {
+        $unwind: {
+          path: "$projectResourcesExpense",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
       {
         $lookup: {
           from: "clients",
@@ -662,7 +667,15 @@ router.get("/report", async (req, res) => {
           workDone: "$tasks.workedDone",
         },
       },
-      { $project: { tasks: 0, phase: 0 } },
+      { $project: { tasks: 0 } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedUser",
+          foreignField: "_id",
+          as: "assignedUser",
+        },
+      },
     ]);
     if (!project) {
       return res.status(404).send("Project with given id is not present"); // when there is no id in db

@@ -4,6 +4,7 @@ const { extend } = require("lodash");
 var router = express.Router();
 const { Client } = require("../../model/client");
 const auth = require("../../middlewares/auth");
+const { Project } = require("../../model/project");
 
 /* Get All Designations And Users */
 router.get("/show-client", auth, async (req, res) => {
@@ -15,6 +16,34 @@ router.get("/show-client", auth, async (req, res) => {
     .skip(skipRecords)
     .limit(perPage);
   return res.send(client);
+});
+
+router.get("/:id", auth, async (req, res) => {
+  let client;
+  let projects;
+  try {
+    client = await Client.findById(req.params.id).populate("country");
+    if (!client)
+      return res.status(400).send("client with given id is not present");
+  } catch {
+    return res.status(400).send("Invalid Id"); // when id is inavlid
+  }
+  try {
+    projects = await Project.find({ client: req.params.id })
+      .populate("createdBy")
+      .populate("client")
+      .populate("nature")
+      .populate("technology")
+      .populate("platform")
+      .populate("assignedUser")
+      .populate("projectManager")
+      .populate("status")
+      .populate("service")
+      .populate("currency");
+  } catch (error) {
+    return res.status(400).send("Error finding client projects");
+  }
+  return res.send({ client, projects });
 });
 
 /*Add new Designation*/
