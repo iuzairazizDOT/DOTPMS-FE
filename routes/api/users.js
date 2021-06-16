@@ -11,6 +11,7 @@ const jwt = require("jsonwebtoken");
 const config = require("config");
 const auth = require("../../middlewares/auth");
 const admin = require("../../middlewares/admin");
+const { Tasks } = require("../../model/task");
 
 var Storage = multer.diskStorage({
   destination: "public/uploads/",
@@ -166,17 +167,26 @@ router.put("/update-user/:id", auth, async (req, res) => {
 });
 
 router.get("/:id", auth, async (req, res) => {
+  let tasks, user;
   try {
-    let user = await User.findById(req.params.id)
+    user = await User.findById(req.params.id)
       .populate("technology")
       .populate("machineNo", "machineNo");
     if (!user) {
-      return res.status(400).send("User with given id is not present"); // when there is no id in db
+      return res.status(400).send("user profile with given id is not present"); // when there is no id in db
     }
-    return res.send(user); // when everything is okay
-  } catch {
-    return res.status(400).send("Invalid User Id"); // when id is inavlid
+  } catch (err) {
+    console.log("error=", err);
+    return res.status(400).send("Invalid Id"); // when id is inavlid
   }
+  try {
+    tasks = await Tasks.find({ assignedTo: { _id: req.params.id } });
+  } catch (error) {
+    return res
+      .status(404)
+      .send("Something went wrong while finding user tasks"); // when id is inavlid
+  }
+  return res.send({ user, tasks }); // when everything is okay
 });
 
 // Delete user
