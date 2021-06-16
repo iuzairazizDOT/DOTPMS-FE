@@ -59,6 +59,9 @@ router.get("/show-projects", auth, async (req, res) => {
     .populate("status")
     .populate("service")
     .populate("currency")
+    .sort({
+      createdAt: -1,
+    })
     .skip(skipRecords)
     .limit(perPage);
   return res.send(projects);

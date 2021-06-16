@@ -15,7 +15,9 @@ router.get("/show-history", auth, async (req, res) => {
 });
 
 router.get("/show-single-history/:machineId", auth, async (req, res) => {
-  let history = await History.find({ docId: req.params.machineId });
+  let history = await History.find({ docId: req.params.machineId }).sort({
+    createdAt: -1,
+  });
   return res.send(history);
 });
 
