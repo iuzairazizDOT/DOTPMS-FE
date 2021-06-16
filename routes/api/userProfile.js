@@ -48,4 +48,16 @@ router.delete("/:id", auth, async (req, res) => {
   }
 });
 
+router.get("/:id", auth, async (req, res) => {
+  try {
+    let userprofile = await UserProfile.findById(req.params.id);
+    if (!userprofile) {
+      return res.status(400).send("user profile with given id is not present"); // when there is no id in db
+    }
+    return res.send(userprofile); // when everything is okay
+  } catch {
+    return res.status(400).send("Invalid Task Id"); // when id is inavlid
+  }
+});
+
 module.exports = router;
