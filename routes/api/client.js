@@ -62,16 +62,5 @@ router.delete("/:id", auth, async (req, res) => {
     return res.status(400).send("Invalid Task Id"); // when id is inavlid
   }
 });
-router.get("/:id", auth, async (req, res) => {
-  try {
-    let client = await Client.findById(req.params.id).populate("country");
-    if (!client) {
-      return res.status(400).send("client with given id is not present"); // when there is no id in db
-    }
-    return res.send(client); // when everything is okay
-  } catch {
-    return res.status(400).send("Invalid Task Id"); // when id is inavlid
-  }
-});
 
 module.exports = router;
