@@ -18,7 +18,7 @@ router.get("/show-task", auth, async (req, res) => {
     .populate("project")
     .populate("teamLead")
     .populate("addedby", "name")
-    .populate("approvedBy")
+    .populate("addedBy")
     .populate("assignedTo")
     .skip(skipRecords)
     .limit(perPage);
@@ -73,7 +73,7 @@ router.get("/project-tasks/:id", auth, async (req, res) => {
     .populate("parentTask")
     .populate("project")
     .populate("teamLead")
-    .populate("addedby", "name")
+    .populate("addedBy", "name")
     .populate("approvedBy")
     .populate("assignedTo");
 
@@ -86,7 +86,7 @@ router.get("/parents", auth, async (req, res) => {
     .populate("parentTask")
     .populate("project")
     .populate("teamLead")
-    .populate("addedby")
+    .populate("addedBy")
     .populate("approvedBy")
     .populate("assignedTo");
 
@@ -100,7 +100,7 @@ router.get("/:id", auth, async (req, res) => {
     .populate("parentTask")
     .populate("project")
     .populate("teamLead")
-    .populate("addedby", "name")
+    .populate("addedBy", "name")
     .populate("approvedBy")
     .populate("assignedTo");
 
@@ -109,7 +109,7 @@ router.get("/:id", auth, async (req, res) => {
     .populate("parentTask")
     .populate("project")
     .populate("teamLead")
-    .populate("addedby", "name")
+    .populate("addedBy", "name")
     .populate("approvedBy")
     .populate("assignedTo");
 

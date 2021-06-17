@@ -12,6 +12,8 @@ const config = require("config");
 const auth = require("../../middlewares/auth");
 const admin = require("../../middlewares/admin");
 const { Tasks } = require("../../model/task");
+const { Project } = require("../../model/project");
+const Mongoose = require("mongoose");
 
 var Storage = multer.diskStorage({
   destination: "public/uploads/",
@@ -198,6 +200,32 @@ router.delete("/:id", auth, async (req, res) => {
     }
     return res.send(user); // when everything is okay
   } catch {
+    return res.status(400).send("Invalid Id"); // when id is inavlid
+  }
+});
+
+router.get("/by-project/:id", auth, async (req, res) => {
+  try {
+    let users = await Project.aggregate([
+      { $match: { _id: Mongoose.Types.ObjectId(req.params.id) } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "assignedUser",
+          foreignField: "_id",
+          as: "assignedUser",
+        },
+      },
+      { $project: { _id: 0, assignedUser: 1 } },
+      { $unwind: { path: "$assignedUser" } },
+      { $replaceRoot: { newRoot: "$assignedUser" } },
+    ]);
+    if (!users) {
+      return res.status(400).send("project with given id is not present"); // when there is no id in db
+    }
+    return res.send(users); // when everything is okay
+  } catch (err) {
+    console.log(err);
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
 });
