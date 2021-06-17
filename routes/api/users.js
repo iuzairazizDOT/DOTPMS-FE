@@ -67,6 +67,9 @@ router.get("/", auth, async function (req, res, next) {
   let user = await User.find(requestObject)
     .populate("technology")
     .populate("machineNo", "machineNo")
+    .sort({
+      createdAt: -1,
+    })
     .skip(skipRecords)
     .limit(perPage);
   return res.send(user);
@@ -182,7 +185,10 @@ router.get("/:id", auth, async (req, res) => {
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
   try {
-    tasks = await Tasks.find({ assignedTo: { _id: req.params.id } });
+    tasks = await Tasks.find({ assignedTo: { _id: req.params.id } })
+      .populate("project")
+      .populate("teamLead")
+      .populate("addedBy");
   } catch (error) {
     return res
       .status(404)

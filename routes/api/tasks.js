@@ -20,6 +20,9 @@ router.get("/show-task", auth, async (req, res) => {
     .populate("addedby", "name")
     .populate("addedBy")
     .populate("assignedTo")
+    .sort({
+      createdAt: -1,
+    })
     .skip(skipRecords)
     .limit(perPage);
   return res.send(tasks);
@@ -75,7 +78,10 @@ router.get("/project-tasks/:id", auth, async (req, res) => {
     .populate("teamLead")
     .populate("addedBy", "name")
     .populate("approvedBy")
-    .populate("assignedTo");
+    .populate("assignedTo")
+    .sort({
+      createdAt: -1,
+    });
 
   return res.send(tasks);
 });
@@ -88,7 +94,10 @@ router.get("/parents", auth, async (req, res) => {
     .populate("teamLead")
     .populate("addedBy")
     .populate("approvedBy")
-    .populate("assignedTo");
+    .populate("assignedTo")
+    .sort({
+      createdAt: -1,
+    });
 
   return res.send(tasks);
 });
@@ -102,7 +111,10 @@ router.get("/:id", auth, async (req, res) => {
     .populate("teamLead")
     .populate("addedBy", "name")
     .populate("approvedBy")
-    .populate("assignedTo");
+    .populate("assignedTo")
+    .sort({
+      createdAt: -1,
+    });
 
   let subTasks = await Tasks.find({ parentTask: task._id })
     .populate("projects")
@@ -111,7 +123,10 @@ router.get("/:id", auth, async (req, res) => {
     .populate("teamLead")
     .populate("addedBy", "name")
     .populate("approvedBy")
-    .populate("assignedTo");
+    .populate("assignedTo")
+    .sort({
+      createdAt: -1,
+    });
 
   return res.send({ task, subTasks });
 });

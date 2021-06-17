@@ -10,7 +10,12 @@ router.get("/show-accessory", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
-  let accessories = await Accessories.find().skip(skipRecords).limit(perPage);
+  let accessories = await Accessories.find()
+    .sort({
+      createdAt: -1,
+    })
+    .skip(skipRecords)
+    .limit(perPage);
   return res.send(accessories);
 });
 
