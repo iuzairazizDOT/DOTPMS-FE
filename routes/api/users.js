@@ -74,6 +74,10 @@ router.get("/", auth, async function (req, res, next) {
     .limit(perPage);
   return res.send(user);
 });
+router.get("/machine-resource", auth, async function (req, res, next) {
+  let user = await User.find({ machineNo: req.body._id });
+  return res.send(user);
+});
 
 /* Signup . */
 router.post("/register", upload, async (req, res) => {
