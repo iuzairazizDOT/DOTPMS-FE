@@ -39,12 +39,12 @@ router.get("/show-projects", auth, async (req, res) => {
     let startdate = {};
     startdate1 = "1-1-1990";
     startdate.$gte = moment(startdate1).startOf("day");
-    requestObject.cStartDate = startdate;
+    requestObject.pmStartDate = startdate;
   } else {
     console.log("else", startDate);
     let startdate = {};
     startdate.$gte = moment(startDate).startOf("day");
-    requestObject.cStartDate = startdate;
+    requestObject.pmStartDate = startdate;
   }
 
   let projects = await Project.find(requestObject)
@@ -337,13 +337,13 @@ router.get("/report", async (req, res) => {
       let startdate = {};
       startdate1 = moment("1-1-1990", "DD-MM-YYYY");
       startdate.$gte = moment(startdate1).startOf("day").toDate();
-      requestObject.cStartDate = startdate;
+      requestObject.pmStartDate = startdate;
       console.log(startdate);
     } else {
       console.log("else", startDate);
       let startdate = {};
       startdate.$gte = moment(startDate).startOf("day").toDate();
-      requestObject.cStartDate = startdate;
+      requestObject.pmStartDate = startdate;
       console.log(startdate);
     }
 
