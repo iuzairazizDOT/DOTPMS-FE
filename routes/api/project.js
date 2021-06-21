@@ -39,12 +39,12 @@ router.get("/show-projects", auth, async (req, res) => {
     let startdate = {};
     startdate1 = "1-1-1990";
     startdate.$gte = moment(startdate1).startOf("day");
-    requestObject.cStartDate = startdate;
+    requestObject.pmStartDate = startdate;
   } else {
     console.log("else", startDate);
     let startdate = {};
     startdate.$gte = moment(startDate).startOf("day");
-    requestObject.cStartDate = startdate;
+    requestObject.pmStartDate = startdate;
   }
 
   let projects = await Project.find(requestObject)
@@ -312,9 +312,43 @@ router.get("/project-with-tasks/:projectId", async (req, res) => {
 router.get("/report", async (req, res) => {
   try {
     // console.log("emp id", req.params.id);
+    let status = req.query.status ? req.query.status : "";
+    let platForm = req.query.platForm ? req.query.platForm : "";
+    let technology = req.query.technology ? req.query.technology : "";
+    let startDate = req.query.startDate ? req.query.startDate : "";
+    let requestObject = {};
+    if (status) {
+      requestObject.status = Mongoose.Types.ObjectId(`${status}`);
+    } else {
+      null;
+    }
+
+    if (platForm) {
+      requestObject.platform = Mongoose.Types.ObjectId(`${platForm}`);
+    } else {
+      null;
+    }
+    if (technology) {
+      requestObject.technology = Mongoose.Types.ObjectId(`${technology}`);
+    } else {
+      null;
+    }
+    if (startDate === null || startDate === "") {
+      let startdate = {};
+      startdate1 = moment("1-1-1990", "DD-MM-YYYY");
+      startdate.$gte = moment(startdate1).startOf("day").toDate();
+      requestObject.pmStartDate = startdate;
+      console.log(startdate);
+    } else {
+      console.log("else", startDate);
+      let startdate = {};
+      startdate.$gte = moment(startDate).startOf("day").toDate();
+      requestObject.pmStartDate = startdate;
+      console.log(startdate);
+    }
 
     let project = await Project.aggregate([
-      // { $match: { _id: Mongoose.Types.ObjectId("60a676108408824bedad262b") } },
+      { $match: requestObject },
       {
         $lookup: {
           from: "expenses",
@@ -682,7 +716,7 @@ router.get("/report", async (req, res) => {
     }
     return res.send(project); // when everything is okay
   } catch (err) {
-    console.log(err);
+    console.log("error", err);
     return res.status(400).send("invalid id"); // when id is inavlid
   }
 });
