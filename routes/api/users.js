@@ -124,7 +124,7 @@ router.post("/login", async (req, res) => {
     {
       _id: user._id,
       name: user.name,
-      role: user.role,
+      userRole: user.userRole,
     },
     config.get("jwtPrivateKey")
   );
