@@ -131,6 +131,23 @@ router.get("/:id", auth, async (req, res) => {
   return res.send({ task, subTasks });
 });
 
+router.get("/by-employee/:empId", auth, async (req, res) => {
+  console.log(req.params.empId);
+  let task = await Tasks.find({ assignedTo: req.params.empId })
+    .populate("projects")
+    .populate("parentTask")
+    .populate("project")
+    .populate("teamLead")
+    .populate("addedBy", "name")
+    .populate("approvedBy")
+    .populate("assignedTo")
+    .sort({
+      createdAt: -1,
+    });
+
+  return res.send(task);
+});
+
 router.post("/by-employee-project", auth, async (req, res) => {
   let { empId, projectId } = req.body;
   console.log("body", req.body);
