@@ -87,17 +87,50 @@ router.get("/project-tasks/:id", auth, async (req, res) => {
 });
 
 router.get("/parents", auth, async (req, res) => {
-  let tasks = await Tasks.find({ parentTask: null })
-    .populate("projects")
-    .populate("parentTask")
-    .populate("project")
-    .populate("teamLead")
-    .populate("addedBy")
-    .populate("approvedBy")
-    .populate("assignedTo")
-    .sort({
-      createdAt: -1,
-    });
+  let tasks = await Tasks.aggregate([
+    { $match: { parentTask: null } },
+    {
+      $lookup: {
+        from: "projects",
+        localField: "project",
+        foreignField: "_id",
+        as: "project",
+      },
+    },
+    { $unwind: { path: "$project", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "addedBy",
+        foreignField: "_id",
+        as: "addedBy",
+      },
+    },
+    { $unwind: { path: "$addedBy", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "teamLead",
+        foreignField: "_id",
+        as: "teamLead",
+      },
+    },
+    { $unwind: { path: "$teamLead", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "timesheets",
+        let: { taskId: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$task", "$$taskId"] } } },
+          { $group: { _id: null, actualHrs: { $sum: "$workedHrs" } } },
+          { $project: { _id: 0 } },
+        ],
+        as: "timesheet",
+      },
+    },
+    { $unwind: { path: "$timesheet", preserveNullAndEmptyArrays: true } },
+    { $sort: { createdAt: -1 } },
+  ]);
 
   return res.send(tasks);
 });
@@ -133,17 +166,51 @@ router.get("/:id", auth, async (req, res) => {
 
 router.get("/by-employee/:empId", auth, async (req, res) => {
   console.log(req.params.empId);
-  let task = await Tasks.find({ assignedTo: req.params.empId })
-    .populate("projects")
-    .populate("parentTask")
-    .populate("project")
-    .populate("teamLead")
-    .populate("addedBy", "name")
-    .populate("approvedBy")
-    .populate("assignedTo")
-    .sort({
-      createdAt: -1,
-    });
+
+  let task = await Tasks.aggregate([
+    { $match: { assignedTo: mongoose.Types.ObjectId(req.params.empId) } },
+    {
+      $lookup: {
+        from: "projects",
+        localField: "project",
+        foreignField: "_id",
+        as: "project",
+      },
+    },
+    { $unwind: { path: "$project", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "addedBy",
+        foreignField: "_id",
+        as: "addedBy",
+      },
+    },
+    { $unwind: { path: "$addedBy", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "teamLead",
+        foreignField: "_id",
+        as: "teamLead",
+      },
+    },
+    { $unwind: { path: "$teamLead", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "timesheets",
+        let: { taskId: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$task", "$$taskId"] } } },
+          { $group: { _id: null, actualHrs: { $sum: "$workedHrs" } } },
+          { $project: { _id: 0 } },
+        ],
+        as: "timesheet",
+      },
+    },
+    { $unwind: { path: "$timesheet", preserveNullAndEmptyArrays: true } },
+    { $sort: { createdAt: -1 } },
+  ]);
 
   return res.send(task);
 });
@@ -176,8 +243,21 @@ router.post("/employee", auth, async (req, res) => {
   console.log("end==", endDate);
   try {
     let result = await Tasks.aggregate([
-      { $project: { name: 1, project: 1, assignedTo: 1, workDone: 1 } },
-      { $match: { assignedTo: mongoose.Types.ObjectId(empId) } },
+      {
+        $project: {
+          name: 1,
+          project: 1,
+          assignedTo: 1,
+          workDone: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $match: {
+          assignedTo: mongoose.Types.ObjectId(empId),
+          createdAt: { $lte: endDate },
+        },
+      },
       {
         $lookup: {
           from: "timesheets",
