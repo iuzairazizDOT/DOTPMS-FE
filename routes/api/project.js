@@ -316,6 +316,12 @@ router.get("/report", async (req, res) => {
     let platForm = req.query.platForm ? req.query.platForm : "";
     let technology = req.query.technology ? req.query.technology : "";
     let startDate = req.query.startDate ? req.query.startDate : "";
+    let clientStartDate = req.query.clientStartDate
+      ? req.query.clientStartDate
+      : "";
+    let clientDeadline = req.query.clientDeadline
+      ? req.query.clientDeadline
+      : "";
     let requestObject = {};
     if (status) {
       requestObject.status = Mongoose.Types.ObjectId(`${status}`);
@@ -333,18 +339,24 @@ router.get("/report", async (req, res) => {
     } else {
       null;
     }
-    if (startDate === null || startDate === "") {
-      let startdate = {};
-      startdate1 = moment("1-1-1990", "DD-MM-YYYY");
-      startdate.$gte = moment(startdate1).startOf("day").toDate();
-      requestObject.pmStartDate = startdate;
-      console.log(startdate);
-    } else {
+    if (startDate != "") {
       console.log("else", startDate);
       let startdate = {};
       startdate.$gte = moment(startDate).startOf("day").toDate();
       requestObject.pmStartDate = startdate;
       console.log(startdate);
+    }
+
+    if (clientStartDate != "") {
+      let clientstartdate = {};
+      clientstartdate.$gte = moment(clientStartDate).startOf("day").toDate();
+      requestObject.cStartDate = clientstartdate;
+    }
+
+    if (clientDeadline != "") {
+      let clientdeadline = {};
+      clientdeadline.$lte = moment(clientDeadline).startOf("day").toDate();
+      requestObject.cEndDate = clientdeadline;
     }
 
     let project = await Project.aggregate([

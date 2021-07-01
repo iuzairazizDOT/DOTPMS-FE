@@ -138,9 +138,25 @@ router.put("/:id", auth, async (req, res) => {
     return res.status(400).send("User with given id is not present"); // when there is no id in db
   }
   user.technology = req.body.technology;
+  user.contact = req.body.contact;
+  user.otherContact = req.body.otherContact;
+  user.emailPersonal = req.body.emailPersonal;
+  user.address = req.body.address;
+  user.contactEmergency = req.body.contactEmergency;
+  user.nameEmergency = req.body.nameEmergency;
 
   user.save();
-  return res.send(user.technology);
+  return res.send(
+    _.pick(user, [
+      "technology",
+      "contact",
+      "otherContact",
+      "emailPersonal",
+      "address",
+      "contactEmergency",
+      "nameEmergency",
+    ])
+  );
 });
 
 router.put("/update-password/:id", auth, async (req, res) => {
@@ -148,10 +164,14 @@ router.put("/update-password/:id", auth, async (req, res) => {
   if (!user) {
     return res.status(400).send("User with given id is not present"); // when there is no id in db
   }
-  user.password = req.body.password;
-  await user.generateHashedPassword();
-  await user.save();
-  return res.send(user.password);
+  let isValid = await bcrypt.compare(req.body.oldPassword, user.password);
+  if (isValid) {
+    user.password = req.body.password;
+    await user.generateHashedPassword();
+    await user.save();
+    return res.send("Password Changed Successfully");
+  }
+  return res.send("Invalid Old Password");
 });
 
 router.put("/update-user/:id", auth, async (req, res) => {

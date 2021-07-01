@@ -9,7 +9,7 @@ const { Project } = require("../../model/project");
 /* Get All Designations And Users */
 router.get("/show-client", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
-  let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+  let perPage = Number(req.query.perPage ? req.query.perPage : 1000);
   let skipRecords = perPage * (page - 1);
   let client = await Client.find()
     .populate("country")

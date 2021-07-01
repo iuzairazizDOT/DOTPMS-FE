@@ -12,6 +12,12 @@ const userSchema = mongoose.Schema(
     password: String,
     status: String,
     joiningDate: String,
+    contact: String,
+    otherContact: String,
+    emailPersonal: String,
+    address: String,
+    contactEmergency: String,
+    nameEmergency: String,
     machineNo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Machine",
