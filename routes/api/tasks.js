@@ -137,7 +137,98 @@ router.get("/parents", auth, async (req, res) => {
 
 router.get("/:id", auth, async (req, res) => {
   console.log(req.params.id);
-  let task = await Tasks.findById(req.params.id)
+  let task = await Tasks.aggregate([
+    { $match: { _id: mongoose.Types.ObjectId(req.params.id) } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "assignedTo",
+        foreignField: "_id",
+        as: "assignedTo",
+      },
+    },
+    {
+      $lookup: {
+        from: "projects",
+        localField: "project",
+        foreignField: "_id",
+        as: "project",
+      },
+    },
+    { $unwind: { path: "$project", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "tasks",
+        localField: "parentTask",
+        foreignField: "_id",
+        as: "parentTask",
+      },
+    },
+    { $unwind: { path: "$parentTask", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "addedBy",
+        foreignField: "_id",
+        as: "addedBy",
+      },
+    },
+    { $unwind: { path: "$addedBy", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "teamLead",
+        foreignField: "_id",
+        as: "teamLead",
+      },
+    },
+    { $unwind: { path: "$teamLead", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "timesheets",
+        let: { taskId: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$task", "$$taskId"] } } },
+          { $group: { _id: null, actualHrs: { $sum: "$workedHrs" } } },
+          { $project: { _id: 0 } },
+        ],
+        as: "timesheet",
+      },
+    },
+    { $unwind: { path: "$timesheet", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "timesheets",
+        let: { taskId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ["$task", "$$taskId"] },
+                  { $ne: ["$remarks", null] },
+                ],
+              },
+            },
+          },
+          {
+            $lookup: {
+              from: "users",
+              localField: "employee",
+              foreignField: "_id",
+              as: "employee",
+            },
+          },
+          { $unwind: { path: "$employee", preserveNullAndEmptyArrays: true } },
+          { $project: { _id: 0, remarks: 1, date: 1, employee: 1 } },
+        ],
+        as: "taskRemarks",
+      },
+    },
+    { $sort: { createdAt: -1 } },
+  ]);
+
+  let subTasks = await Tasks.find({ parentTask: task[0]._id })
     .populate("projects")
     .populate("parentTask")
     .populate("project")
@@ -149,19 +240,7 @@ router.get("/:id", auth, async (req, res) => {
       createdAt: -1,
     });
 
-  let subTasks = await Tasks.find({ parentTask: task._id })
-    .populate("projects")
-    .populate("parentTask")
-    .populate("project")
-    .populate("teamLead")
-    .populate("addedBy", "name")
-    .populate("approvedBy")
-    .populate("assignedTo")
-    .sort({
-      createdAt: -1,
-    });
-
-  return res.send({ task, subTasks });
+  return res.send({ task: task[0], subTasks });
 });
 
 router.get("/by-employee/:empId", auth, async (req, res) => {
