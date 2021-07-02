@@ -18,52 +18,61 @@ router.get("/show-projects", auth, async (req, res) => {
   let endDate = req.query.endDate ? req.query.endDate : "";
   let skipRecords = perPage * (page - 1);
   let requestObject = {};
-  if (status) {
-    requestObject.status = `${status}`;
-  } else {
-    null;
-  }
 
-  if (platForm) {
-    requestObject.platform = `${platForm}`;
-  } else {
-    null;
-  }
-  if (technology) {
-    requestObject.technology = `${technology}`;
-  } else {
-    null;
-  }
-  if (startDate === "null" || startDate === "") {
-    console.log("if", startDate);
-    let startdate = {};
-    startdate1 = "1-1-1990";
-    startdate.$gte = moment(startdate1).startOf("day");
-    requestObject.pmStartDate = startdate;
-  } else {
-    console.log("else", startDate);
-    let startdate = {};
-    startdate.$gte = moment(startDate).startOf("day");
-    requestObject.pmStartDate = startdate;
-  }
+  let projects = await Project.aggregate([
+    {
+      $lookup: {
+        from: "tasks",
+        let: { pId: "$_id" },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $eq: ["$project", "$$pId"],
+              },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              projectRatioOccupied: {
+                $sum: "$projectRatio",
+              },
+              estHrsOccupied: {
+                $sum: "$estHrs",
+              },
+            },
+          },
+          {
+            $project: {
+              _id: 0,
+              remainingProjectRatio: {
+                $subtract: [100, "$projectRatioOccupied"],
+              },
+              estHrsOccupied: 1,
+            },
+          },
+        ],
+        as: "tasks",
+      },
+    },
+    { $unwind: { path: "$tasks", preserveNullAndEmptyArrays: true } },
+    {
+      $addFields: {
+        projectTotalEstTime: {
+          $sum: "$phase.estTime",
+        },
+      },
+    },
+    {
+      $addFields: {
+        projectRemainingEstTime: {
+          $subtract: ["$projectTotalEstTime", "$tasks.estHrsOccupied"],
+        },
+      },
+    },
+  ]);
 
-  let projects = await Project.find(requestObject)
-    .populate("tasks")
-    .populate("createdBy")
-    .populate("client")
-    .populate("nature")
-    .populate("technology")
-    .populate("platform")
-    .populate("assignedUser")
-    .populate("projectManager")
-    .populate("status")
-    .populate("service")
-    .populate("currency")
-    .sort({
-      createdAt: -1,
-    })
-    .skip(skipRecords)
-    .limit(perPage);
   return res.send(projects);
 });
 
