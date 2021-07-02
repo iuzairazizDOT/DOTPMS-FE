@@ -6,6 +6,7 @@ const timesheetSchema = mongoose.Schema(
     remarks: String,
     workedHrs: Number,
     approvedHrs: { type: Number, default: null },
+    final: { type: Boolean, default: false },
     employee: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

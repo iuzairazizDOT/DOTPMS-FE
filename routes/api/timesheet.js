@@ -44,6 +44,7 @@ router.post("/weekly", auth, async (req, res) => {
     const data = req.body.employeeData;
     const empId = req.body.empId;
     const days = req.body.days;
+    const final = req.body.final;
     console.log("body", req.body);
     // console.log("asddasda",moment(body["task1day1date"]).format("YYYY-MM-DD"));
     let records = [];
@@ -67,6 +68,7 @@ router.post("/weekly", auth, async (req, res) => {
             remarks: task.timesheet[item] && task.timesheet[item].remarks,
             approvedBy: null,
             status: "pending",
+            final: final,
           });
         });
         // task.timesheet.map(ts=>{

@@ -337,6 +337,7 @@ router.post("/employee", auth, async (req, res) => {
           createdAt: { $lte: endDate },
         },
       },
+      { $sort: { createdAt: -1 } },
       {
         $lookup: {
           from: "timesheets",
@@ -354,11 +355,13 @@ router.post("/employee", auth, async (req, res) => {
                 },
               },
             },
+            { $sort: { date: 1 } },
           ],
           as: "timesheet",
         },
       },
       { $group: { _id: "$project", tasks: { $push: "$$ROOT" } } },
+
       {
         $lookup: {
           from: "projects",
@@ -374,6 +377,7 @@ router.post("/employee", auth, async (req, res) => {
           _id: 0,
         },
       },
+      { $sort: { "project.createdAt": -1 } },
       // {$replaceRoot:{"newRoot":"$project"}}
     ]);
     if (!result) {
