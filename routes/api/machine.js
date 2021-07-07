@@ -19,6 +19,14 @@ router.get("/show-machine", auth, async (req, res) => {
     },
     {
       $lookup: {
+        from: "accessories",
+        localField: "Accessory",
+        foreignField: "_id",
+        as: "Accessory",
+      },
+    },
+    {
+      $lookup: {
         from: "users",
         localField: "_id",
         foreignField: "machineNo",

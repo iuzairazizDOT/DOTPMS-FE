@@ -91,6 +91,14 @@ router.get("/parents", auth, async (req, res) => {
     { $match: { parentTask: null } },
     {
       $lookup: {
+        from: "users",
+        localField: "assignedTo",
+        foreignField: "_id",
+        as: "assignedTo",
+      },
+    },
+    {
+      $lookup: {
         from: "projects",
         localField: "project",
         foreignField: "_id",
