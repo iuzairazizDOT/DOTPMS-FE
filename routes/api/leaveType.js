@@ -24,8 +24,7 @@ router.post("/create-leave-type", auth, async (req, res) => {
   let leaveType = await LeaveType.findOne({
     name: req.body.name,
   });
-  if (leaveType)
-    return res.status(400).send("client With Given Name Already Exsists");
+  if (leaveType) return res.status(404).send("Leave Type Already Exsists");
   leaveType = new LeaveType(req.body);
   leaveType
     .save()
