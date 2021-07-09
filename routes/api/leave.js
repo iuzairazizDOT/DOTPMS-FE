@@ -5,6 +5,7 @@ var router = express.Router();
 const { Leave } = require("../../model/leave");
 const auth = require("../../middlewares/auth");
 const { LeaveDetail } = require("../../model/leaveDetail");
+const mongoose = require("mongoose");
 
 /* Get All Designations And Users */
 router.get("/", auth, async (req, res) => {
@@ -65,6 +66,45 @@ router.post("/new", auth, async (req, res) => {
     .catch((err) => {
       return res.status(500).send({ error: err });
     });
+});
+router.get("/:id", auth, async (req, res) => {
+  try {
+    let page = Number(req.query.page ? req.query.page : 1);
+    let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+    let skipRecords = perPage * (page - 1);
+    let leaves = await Leave.aggregate([
+      { $match: { _id: mongoose.Types.ObjectId(req.params.id) } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "leavetypes",
+          localField: "type",
+          foreignField: "_id",
+          as: "type",
+        },
+      },
+      { $unwind: { path: "$type", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "leavedetails",
+          localField: "_id",
+          foreignField: "leave",
+          as: "dates",
+        },
+      },
+    ]);
+    return res.send(leaves[0]); //aggregate always return array. in this case it always returns array of one element
+  } catch (err) {
+    return res.send(err);
+  }
 });
 
 module.exports = router;
