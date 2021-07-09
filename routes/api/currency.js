@@ -20,7 +20,7 @@ router.post("/create-currency", auth, async (req, res) => {
     name: req.body.name,
   });
   if (currency)
-    return res.status(400).send("currency With Given Name Already Exsists");
+    return res.status(400).send("Currency With Given Name Already Exsists");
   currency = new Currency(req.body);
   currency
     .save()
@@ -38,7 +38,7 @@ router.put("/:id", auth, async (req, res) => {
     let currency = await Currency.findById(req.params.id);
     console.log(currency);
     if (!currency)
-      return res.status(400).send("currency with given id is not present");
+      return res.status(400).send("Currency with given id is not present");
     currency = extend(currency, req.body);
     await currency.save();
     return res.send(currency);
@@ -52,7 +52,7 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let currency = await Currency.findByIdAndDelete(req.params.id);
     if (!currency) {
-      return res.status(400).send("currency with given id is not present"); // when there is no id in db
+      return res.status(400).send("Currency with given id is not present"); // when there is no id in db
     }
     return res.send(currency); // when everything is okay
   } catch {
@@ -64,7 +64,7 @@ router.get("/:id", async (req, res) => {
   try {
     let currency = await Currency.findById(req.params.id);
     if (!currency) {
-      return res.status(400).send("currency with given id is not present"); // when there is no id in db
+      return res.status(400).send("Currency with given id is not present"); // when there is no id in db
     }
     return res.send(currency); // when everything is okay
   } catch {

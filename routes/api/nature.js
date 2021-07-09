@@ -20,7 +20,7 @@ router.post("/create-nature", auth, async (req, res) => {
     name: req.body.name,
   });
   if (nature)
-    return res.status(400).send("nature With Given Name Already Exsists");
+    return res.status(400).send("Nature With Given Name Already Exsists");
   nature = new Nature(req.body);
   nature
     .save()
@@ -38,7 +38,7 @@ router.put("/:id", auth, async (req, res) => {
     let nature = await Nature.findById(req.params.id);
     console.log(nature);
     if (!nature)
-      return res.status(400).send("nature with given id is not present");
+      return res.status(400).send("Nature with given id is not present");
     nature = extend(nature, req.body);
     await nature.save();
     return res.send(nature);
@@ -52,7 +52,7 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let nature = await Nature.findByIdAndDelete(req.params.id);
     if (!nature) {
-      return res.status(400).send("nature with given id is not present"); // when there is no id in db
+      return res.status(400).send("Nature with given id is not present"); // when there is no id in db
     }
     return res.send(nature); // when everything is okay
   } catch {
