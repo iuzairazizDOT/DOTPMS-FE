@@ -32,6 +32,7 @@ var apiHistoryRouter = require("./routes/api/history");
 var apiLeaveTypeRouter = require("./routes/api/leaveType");
 var apiRequestTypeRouter = require("./routes/api/requestType");
 var apiRequestRouter = require("./routes/api/request");
+var apiLeaveRouter = require("./routes/api/leave");
 
 var app = express();
 
@@ -70,6 +71,7 @@ app.use("/history", apiHistoryRouter);
 app.use("/leave-type", apiLeaveTypeRouter);
 app.use("/request-type", apiRequestTypeRouter);
 app.use("/request", apiRequestRouter);
+app.use("/leave", apiLeaveRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

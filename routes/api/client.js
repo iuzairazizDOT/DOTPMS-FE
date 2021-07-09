@@ -24,7 +24,7 @@ router.get("/:id", auth, async (req, res) => {
   try {
     client = await Client.findById(req.params.id).populate("country");
     if (!client)
-      return res.status(400).send("client with given id is not present");
+      return res.status(400).send("Client with given id is not present");
   } catch {
     return res.status(400).send("Invalid Id"); // when id is inavlid
   }
@@ -52,7 +52,7 @@ router.post("/create-client", auth, async (req, res) => {
     name: req.body.name,
   });
   if (client)
-    return res.status(400).send("client With Given Name Already Exsists");
+    return res.status(400).send("Client With Given Name Already Exsists");
   client = new Client(req.body);
   client
     .save()
@@ -70,7 +70,7 @@ router.put("/:id", auth, async (req, res) => {
     let client = await Client.findById(req.params.id);
     console.log(client);
     if (!client)
-      return res.status(400).send("client with given id is not present");
+      return res.status(400).send("Client with given id is not present");
     client = extend(client, req.body);
     await client.save();
     return res.send(client);
@@ -84,7 +84,7 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let client = await Client.findByIdAndDelete(req.params.id);
     if (!client) {
-      return res.status(400).send("client with given id is not present"); // when there is no id in db
+      return res.status(400).send("Client with given id is not present"); // when there is no id in db
     }
     return res.send(client); // when everything is okay
   } catch {

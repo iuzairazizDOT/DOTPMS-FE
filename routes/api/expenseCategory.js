@@ -22,7 +22,9 @@ router.post("/create-expense-category", auth, async (req, res) => {
     name: req.body.name,
   });
   if (expenseCatgeory)
-    return res.status(400).send("currency With Given Name Already Exsists");
+    return res
+      .status(400)
+      .send("Expense Catgeory With Given Name Already Exsists");
   expenseCatgeory = new ExpenseCatgeory(req.body);
   expenseCatgeory
     .save()
@@ -40,7 +42,9 @@ router.put("/:id", auth, async (req, res) => {
     let expenseCatgeory = await ExpenseCatgeory.findById(req.params.id);
     console.log(expenseCatgeory);
     if (!expenseCatgeory)
-      return res.status(400).send("currency with given id is not present");
+      return res
+        .status(400)
+        .send("Expense Catgeory with given id is not present");
     expenseCatgeory = extend(expenseCatgeory, req.body);
     await expenseCatgeory.save();
     return res.send(expenseCatgeory);
@@ -56,7 +60,9 @@ router.delete("/:id", auth, async (req, res) => {
       req.params.id
     );
     if (!expenseCatgeory) {
-      return res.status(400).send("currency with given id is not present"); // when there is no id in db
+      return res
+        .status(400)
+        .send("Expense Catgeory with given id is not present"); // when there is no id in db
     }
     return res.send(expenseCatgeory); // when everything is okay
   } catch {

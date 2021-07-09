@@ -34,7 +34,7 @@ router.post("/create-expense", auth, async (req, res) => {
     name: req.body.name,
   });
   if (expense)
-    return res.status(400).send("client With Given Name Already Exsists");
+    return res.status(400).send("Expense With Given Name Already Exsists");
   expense = Expense.insertMany(req.body)
     .then((resp) => {
       return res.send(resp);
@@ -49,7 +49,7 @@ router.put("/:id", auth, async (req, res) => {
   try {
     let expense = await Expense.findById(req.params.id);
     if (!expense)
-      return res.status(400).send("expense with given id is not present");
+      return res.status(400).send("Expense with given id is not present");
     expense = extend(expense, req.body);
     await expense.save();
     return res.send(expense);
@@ -63,7 +63,7 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let expense = await Expense.findByIdAndDelete(req.params.id);
     if (!expense) {
-      return res.status(400).send("client with given id is not present"); // when there is no id in db
+      return res.status(400).send("Expense with given id is not present"); // when there is no id in db
     }
     return res.send(expense); // when everything is okay
   } catch {

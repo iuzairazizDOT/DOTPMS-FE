@@ -25,7 +25,7 @@ router.post("/create-accessory", auth, async (req, res) => {
     name: req.body.name,
   });
   if (accessories)
-    return res.status(400).send("client With Given Name Already Exsists");
+    return res.status(400).send("Accessories With Given Name Already Exsists");
   accessories = new Accessories(req.body);
   accessories
     .save()
@@ -43,7 +43,7 @@ router.put("/:id", auth, async (req, res) => {
     let accessories = await Accessories.findById(req.params.id);
     console.log(accessories);
     if (!accessories)
-      return res.status(400).send("client with given id is not present");
+      return res.status(400).send("Accessories with given id is not present");
     accessories = extend(accessories, req.body);
     await accessories.save();
     return res.send(accessories);
@@ -57,7 +57,7 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let accessories = await Accessories.findByIdAndDelete(req.params.id);
     if (!accessories) {
-      return res.status(400).send("client with given id is not present"); // when there is no id in db
+      return res.status(400).send("Accessories with given id is not present"); // when there is no id in db
     }
     return res.send(accessories); // when everything is okay
   } catch {

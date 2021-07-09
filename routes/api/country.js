@@ -20,7 +20,7 @@ router.post("/create-country", auth, async (req, res) => {
     name: req.body.name,
   });
   if (country)
-    return res.status(400).send("country With Given Name Already Exsists");
+    return res.status(400).send("Country With Given Name Already Exsists");
   country = new Country(req.body);
   country
     .save()
@@ -38,7 +38,7 @@ router.put("/:id", auth, async (req, res) => {
     let country = await Country.findById(req.params.id);
     console.log(country);
     if (!country)
-      return res.status(400).send("country with given id is not present");
+      return res.status(400).send("Country with given id is not present");
     // country = extend(country, req.body);
     country.name = req.body.name;
     await country.save();
@@ -53,7 +53,7 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let country = await Country.findByIdAndDelete(req.params.id);
     if (!country) {
-      return res.status(400).send("country with given id is not present"); // when there is no id in db
+      return res.status(400).send("Country with given id is not present"); // when there is no id in db
     }
     return res.send(country); // when everything is okay
   } catch {
