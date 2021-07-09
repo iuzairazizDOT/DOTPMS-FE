@@ -107,4 +107,32 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
+router.get("/remaining/:typeId", auth, async (req, res) => {
+  try {
+    let page = Number(req.query.page ? req.query.page : 1);
+    let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+    let skipRecords = perPage * (page - 1);
+    let leaves = await Leave.aggregate([
+      {
+        $match: {
+          status: "approved",
+          type: mongoose.Types.ObjectId(req.params.typeId),
+        },
+      },
+      {
+        $lookup: {
+          from: "leavedetails",
+          localField: "_id",
+          foreignField: "leave",
+          as: "dates",
+        },
+      },
+      { $addFields: { occupiedLeaves: { $sum: "$dates.date" } } },
+    ]);
+    return res.send(leaves[0]); //aggregate always return array. in this case it always returns array of one element
+  } catch (err) {
+    return res.send(err);
+  }
+});
+
 module.exports = router;
