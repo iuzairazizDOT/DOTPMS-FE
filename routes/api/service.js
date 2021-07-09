@@ -20,7 +20,7 @@ router.post("/create-service", auth, async (req, res) => {
     name: req.body.name,
   });
   if (service)
-    return res.status(400).send("service With Given Name Already Exsists");
+    return res.status(400).send("Service With Given Name Already Exsists");
   service = new Service(req.body);
   service
     .save()
@@ -38,7 +38,7 @@ router.put("/:id", auth, async (req, res) => {
     let service = await Service.findById(req.params.id);
     console.log(service);
     if (!service)
-      return res.status(400).send("service with given id is not present");
+      return res.status(400).send("Service with given id is not present");
     service = extend(service, req.body);
     await service.save();
     return res.send(service);
@@ -52,7 +52,7 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let service = await Service.findByIdAndDelete(req.params.id);
     if (!service) {
-      return res.status(400).send("service with given id is not present"); // when there is no id in db
+      return res.status(400).send("Service with given id is not present"); // when there is no id in db
     }
     return res.send(service); // when everything is okay
   } catch {

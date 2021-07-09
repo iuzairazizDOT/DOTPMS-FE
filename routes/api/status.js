@@ -20,7 +20,7 @@ router.post("/create-status", auth, async (req, res) => {
     name: req.body.name,
   });
   if (status)
-    return res.status(400).send("clstatusient With Given Name Already Exsists");
+    return res.status(400).send("Status With Given Name Already Exsists");
   status = new Status(req.body);
   status
     .save()
@@ -38,7 +38,7 @@ router.put("/:id", auth, async (req, res) => {
     let status = await Status.findById(req.params.id);
     console.log(status);
     if (!status)
-      return res.status(400).send("status with given id is not present");
+      return res.status(400).send("Status with given id is not present");
     status = extend(status, req.body);
     await status.save();
     return res.send(status);
@@ -52,11 +52,11 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let status = await Status.findByIdAndDelete(req.params.id);
     if (!status) {
-      return res.status(400).send("status with given id is not present"); // when there is no id in db
+      return res.status(400).send("Status with given id is not present"); // when there is no id in db
     }
     return res.send(status); // when everything is okay
   } catch {
-    return res.status(400).send("Invalid Task Id"); // when id is inavlid
+    return res.status(400).send("Invalid Status Id"); // when id is inavlid
   }
 });
 

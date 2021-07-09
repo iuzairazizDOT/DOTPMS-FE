@@ -62,7 +62,7 @@ router.get("/single-machine/:machineId", async (req, res) => {
         createdAt: -1,
       });
     if (!machine) {
-      return res.status(404).send("Project with given id is not present"); // when there is no id in db
+      return res.status(404).send("Machine with given id is not present"); // when there is no id in db
     }
     return res.send(machine); // when everything is okay
   } catch (err) {
@@ -105,7 +105,7 @@ router.put("/:id", auth, async (req, res) => {
     }
 
     if (!machine)
-      return res.status(400).send("machine with given id is not present");
+      return res.status(400).send("Machine with given id is not present");
     machine = extend(machine, req.body);
     await machine.save();
 
@@ -121,11 +121,11 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let machine = await Machine.findByIdAndDelete(req.params.id);
     if (!machine) {
-      return res.status(400).send("machine with given id is not present"); // when there is no id in db
+      return res.status(400).send("Machine with given id is not present"); // when there is no id in db
     }
     return res.send(machine); // when everything is okay
   } catch {
-    return res.status(400).send("Invalid machine Id"); // when id is inavlid
+    return res.status(400).send("Invalid Machine Id"); // when id is inavlid
   }
 });
 

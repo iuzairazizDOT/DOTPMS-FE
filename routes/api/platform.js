@@ -20,7 +20,7 @@ router.post("/create-platform", auth, async (req, res) => {
     name: req.body.name,
   });
   if (platform)
-    return res.status(400).send("nature With Given Name Already Exsists");
+    return res.status(400).send("Platform With Given Name Already Exsists");
   platform = new Platform(req.body);
   platform
     .save()
@@ -38,7 +38,7 @@ router.put("/:id", auth, async (req, res) => {
     let platform = await Platform.findById(req.params.id);
     console.log(platform);
     if (!platform)
-      return res.status(400).send("client with given id is not present");
+      return res.status(400).send("Platform with given id is not present");
     platform = extend(platform, req.body);
     await platform.save();
     return res.send(platform);
@@ -52,11 +52,11 @@ router.delete("/:id", auth, async (req, res) => {
   try {
     let platform = await Platform.findByIdAndDelete(req.params.id);
     if (!platform) {
-      return res.status(400).send("client with given id is not present"); // when there is no id in db
+      return res.status(400).send("Platform with given id is not present"); // when there is no id in db
     }
     return res.send(platform); // when everything is okay
   } catch {
-    return res.status(400).send("Invalid Task Id"); // when id is inavlid
+    return res.status(400).send("Invalid Platform Id"); // when id is inavlid
   }
 });
 
