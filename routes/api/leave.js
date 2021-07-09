@@ -15,6 +15,24 @@ router.get("/", auth, async (req, res) => {
     let leaves = await Leave.aggregate([
       {
         $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      { $unwind: { path: "$user", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "leavetypes",
+          localField: "type",
+          foreignField: "_id",
+          as: "type",
+        },
+      },
+      { $unwind: { path: "$type", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
           from: "leavedetails",
           localField: "_id",
           foreignField: "leave",
