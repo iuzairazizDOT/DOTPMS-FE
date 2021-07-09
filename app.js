@@ -30,6 +30,7 @@ var apiMachineRouter = require("./routes/api/machine");
 var apiAccessoriesRouter = require("./routes/api/accessories");
 var apiHistoryRouter = require("./routes/api/history");
 var apiLeaveTypeRouter = require("./routes/api/leaveType");
+var apiLeaveRouter = require("./routes/api/leave");
 
 var app = express();
 
@@ -66,6 +67,7 @@ app.use("/machine", apiMachineRouter);
 app.use("/accessory", apiAccessoriesRouter);
 app.use("/history", apiHistoryRouter);
 app.use("/leave-type", apiLeaveTypeRouter);
+app.use("/leave", apiLeaveRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
