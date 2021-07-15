@@ -11,12 +11,25 @@ router.get("/show-request", auth, async (req, res) => {
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
   let request = await Request.find()
+    .populate("user")
+    .populate("requestType")
     .sort({
       createdAt: -1,
     })
     .skip(skipRecords)
     .limit(perPage);
   return res.send(request);
+});
+
+router.get("/:id", auth, async (req, res) => {
+  try {
+    let request = await Request.findById(req.params.id)
+      .populate("user")
+      .populate("requestType");
+    return res.send(request); //aggregate always return array. in this case it always returns array of one element
+  } catch (err) {
+    return res.send(err);
+  }
 });
 
 /*Add new Request*/
