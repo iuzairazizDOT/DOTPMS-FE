@@ -115,23 +115,27 @@ router.get("/remaining/:typeId", auth, async (req, res) => {
     let leaves = await Leave.aggregate([
       {
         $match: {
-          status: "approved",
+          status: "pending",
           type: mongoose.Types.ObjectId(req.params.typeId),
         },
       },
       {
         $lookup: {
           from: "leavedetails",
-          localField: "_id",
-          foreignField: "leave",
+          let: { leaveId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$leave", "$$leaveId"] } } },
+            { $count: "usedLeaves" },
+          ],
           as: "dates",
         },
       },
-      { $addFields: { occupiedLeaves: { $sum: "$dates.date" } } },
+      { $unwind: { path: "$dates", preserveNullAndEmptyArrays: true } },
+      { $group: { _id: null, usedLeaves: { $sum: "$dates.usedLeaves" } } },
     ]);
     return res.send(leaves[0]); //aggregate always return array. in this case it always returns array of one element
   } catch (err) {
-    return res.send(err);
+    return res.status(500).send(err.message);
   }
 });
 
