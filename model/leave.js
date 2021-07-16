@@ -6,8 +6,15 @@ const leaveSchema = mongoose.Schema(
     user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     description: String,
     adminRemark: { type: String, default: null },
+    pmRemark: { type: String, default: null },
     adminActionDate: { type: Date, default: null },
-    status: {
+    pmActionDate: { type: Date, default: null },
+    adminStatus: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending",
+    },
+    pmStatus: {
       type: String,
       enum: ["pending", "approved", "rejected"],
       default: "pending",

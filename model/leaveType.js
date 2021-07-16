@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const leaveTypeScheme = mongoose.Schema(
   {
     name: String,
-    totalLeaves: String,
+    totalLeaves: Number,
   },
   { timestamps: true }
 );

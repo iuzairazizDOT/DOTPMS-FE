@@ -6,6 +6,7 @@ const { Leave } = require("../../model/leave");
 const { LeaveType } = require("../../model/leaveType");
 const auth = require("../../middlewares/auth");
 const { LeaveDetail } = require("../../model/leaveDetail");
+var moment = require("moment");
 const mongoose = require("mongoose");
 
 /* Get All Designations And Users */
@@ -108,15 +109,29 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-router.post("/used-leaves", auth, async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
+  try {
+    let leave = await Leave.findById(req.params.id);
+    console.log(leave);
+    if (!leave)
+      return res.status(400).send("client with given id is not present");
+    leave = extend(leave, req.body);
+    await leave.save();
+    return res.send(leave);
+  } catch {
+    return res.status(400).send("Invalid Id"); // when id is inavlid
+  }
+});
+
+router.post("/remaining-leaves", auth, async (req, res) => {
   try {
     let page = Number(req.query.page ? req.query.page : 1);
     let perPage = Number(req.query.perPage ? req.query.perPage : 10);
     let skipRecords = perPage * (page - 1);
-    let monthStart = moment().startOf("month").toDate();
-    let monthEnd = moment().endOf("month").toDate();
-    let moasnthStart = moment().utc().startOf("month").toDate();
-    let monasdthEnd = moment().utc().endOf("month").toDate();
+    let yearStart = moment().startOf("year").toDate();
+    let yearEnd = moment().endOf("year").toDate();
+    let moasnthStart = moment().utc().startOf("year").toDate();
+    let monasdthEnd = moment().utc().endOf("year").toDate();
     const { leaveType, user } = req.body;
     let leaves = await Leave.aggregate([
       {
@@ -136,8 +151,8 @@ router.post("/used-leaves", auth, async (req, res) => {
                 $expr: {
                   $and: [
                     { $eq: ["$leave", "$$leaveId"] },
-                    { $gte: ["$date", monthStart] },
-                    { $lte: ["$date", monthEnd] },
+                    { $gte: ["$date", yearStart] },
+                    { $lte: ["$date", yearEnd] },
                   ],
                 },
               },
@@ -156,10 +171,12 @@ router.post("/used-leaves", auth, async (req, res) => {
   }
 });
 
-router.get("/remainingAll/:userId", auth, async (req, res) => {
+router.get("/remaining-leaves-all/:userId", auth, async (req, res) => {
   try {
     let page = Number(req.query.page ? req.query.page : 1);
     let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+    let yearStart = moment().startOf("year").toDate();
+    let yearEnd = moment().endOf("year").toDate();
     let skipRecords = perPage * (page - 1);
     let leaves = await LeaveType.aggregate([
       {
@@ -189,7 +206,13 @@ router.get("/remainingAll/:userId", auth, async (req, res) => {
                 pipeline: [
                   {
                     $match: {
-                      $expr: { $and: [{ $eq: ["$leave", "$$leaveId"] }, {}] },
+                      $expr: {
+                        $and: [
+                          { $eq: ["$leave", "$$leaveId"] },
+                          { $gte: ["$date", yearStart] },
+                          { $lte: ["$date", yearEnd] },
+                        ],
+                      },
                     },
                   },
                   { $count: "usedLeaves" },
@@ -200,11 +223,17 @@ router.get("/remainingAll/:userId", auth, async (req, res) => {
             // { $count: "usedLeaves" },
             { $project: { used: 1 } },
             { $unwind: { path: "$used", preserveNullAndEmptyArrays: true } },
+            { $group: { _id: null, usedLeaves: { $sum: "$used.usedLeaves" } } },
           ],
           as: "leaves",
         },
       },
-      // { $unwind: { path: "$dates", preserveNullAndEmptyArrays: true } },
+      { $unwind: { path: "$leaves", preserveNullAndEmptyArrays: true } },
+      {
+        $addFields: {
+          remaining: { $subtract: ["$totalLeaves", "$leaves.usedLeaves"] },
+        },
+      },
       // { $group: { _id: null, usedLeaves: { $sum: "$dates.usedLeaves" } } },
     ]);
     return res.send(leaves); //aggregate always return array. in this case it always returns array of one element
