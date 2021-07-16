@@ -3,10 +3,10 @@ const _ = require("lodash");
 const { extend } = require("lodash");
 var router = express.Router();
 const { Leave } = require("../../model/leave");
+const { LeaveType } = require("../../model/leaveType");
 const auth = require("../../middlewares/auth");
 const { LeaveDetail } = require("../../model/leaveDetail");
 const mongoose = require("mongoose");
-const moment = require("moment");
 
 /* Get All Designations And Users */
 router.get("/", auth, async (req, res) => {
@@ -108,22 +108,16 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-router.post("/used-leaves", auth, async (req, res) => {
+router.get("/remaining/:typeId", auth, async (req, res) => {
   try {
     let page = Number(req.query.page ? req.query.page : 1);
     let perPage = Number(req.query.perPage ? req.query.perPage : 10);
     let skipRecords = perPage * (page - 1);
-    let monthStart = moment().startOf("month").toDate();
-    let monthEnd = moment().endOf("month").toDate();
-    let moasnthStart = moment().utc().startOf("month").toDate();
-    let monasdthEnd = moment().utc().endOf("month").toDate();
-    const { leaveType, user } = req.body;
     let leaves = await Leave.aggregate([
       {
         $match: {
           status: "pending",
-          type: mongoose.Types.ObjectId(leaveType),
-          user: mongoose.Types.ObjectId(user),
+          type: mongoose.Types.ObjectId(req.params.typeId),
         },
       },
       {
@@ -131,17 +125,7 @@ router.post("/used-leaves", auth, async (req, res) => {
           from: "leavedetails",
           let: { leaveId: "$_id" },
           pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $eq: ["$leave", "$$leaveId"] },
-                    { $gte: ["$date", monthStart] },
-                    { $lte: ["$date", monthEnd] },
-                  ],
-                },
-              },
-            },
+            { $match: { $expr: { $eq: ["$leave", "$$leaveId"] } } },
             { $count: "usedLeaves" },
           ],
           as: "dates",
@@ -150,7 +134,64 @@ router.post("/used-leaves", auth, async (req, res) => {
       { $unwind: { path: "$dates", preserveNullAndEmptyArrays: true } },
       { $group: { _id: null, usedLeaves: { $sum: "$dates.usedLeaves" } } },
     ]);
-    return res.send(leaves[0]); //aggregate always return array. in this case it always returns array of one element
+    return res.send(leaves); //aggregate always return array. in this case it always returns array of one element
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+});
+
+router.get("/remainingAll/:userId", auth, async (req, res) => {
+  try {
+    let page = Number(req.query.page ? req.query.page : 1);
+    let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+    let skipRecords = perPage * (page - 1);
+    let leaves = await LeaveType.aggregate([
+      {
+        $lookup: {
+          from: "leaves",
+          let: { leaveTypeId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$type", "$$leaveTypeId"] },
+                    {
+                      $eq: [
+                        "$user",
+                        mongoose.Types.ObjectId(req.params.userId),
+                      ],
+                    },
+                  ],
+                },
+              },
+            },
+            {
+              $lookup: {
+                from: "leavedetails",
+                let: { leaveId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $and: [{ $eq: ["$leave", "$$leaveId"] }, {}] },
+                    },
+                  },
+                  { $count: "usedLeaves" },
+                ],
+                as: "used",
+              },
+            },
+            // { $count: "usedLeaves" },
+            { $project: { used: 1 } },
+            { $unwind: { path: "$used", preserveNullAndEmptyArrays: true } },
+          ],
+          as: "leaves",
+        },
+      },
+      // { $unwind: { path: "$dates", preserveNullAndEmptyArrays: true } },
+      // { $group: { _id: null, usedLeaves: { $sum: "$dates.usedLeaves" } } },
+    ]);
+    return res.send(leaves); //aggregate always return array. in this case it always returns array of one element
   } catch (err) {
     return res.status(500).send(err.message);
   }
