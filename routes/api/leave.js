@@ -108,16 +108,22 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-router.get("/remaining/:typeId", auth, async (req, res) => {
+router.post("/used-leaves", auth, async (req, res) => {
   try {
     let page = Number(req.query.page ? req.query.page : 1);
     let perPage = Number(req.query.perPage ? req.query.perPage : 10);
     let skipRecords = perPage * (page - 1);
+    let monthStart = moment().startOf("month").toDate();
+    let monthEnd = moment().endOf("month").toDate();
+    let moasnthStart = moment().utc().startOf("month").toDate();
+    let monasdthEnd = moment().utc().endOf("month").toDate();
+    const { leaveType, user } = req.body;
     let leaves = await Leave.aggregate([
       {
         $match: {
           status: "pending",
-          type: mongoose.Types.ObjectId(req.params.typeId),
+          type: mongoose.Types.ObjectId(leaveType),
+          user: mongoose.Types.ObjectId(user),
         },
       },
       {
@@ -125,7 +131,17 @@ router.get("/remaining/:typeId", auth, async (req, res) => {
           from: "leavedetails",
           let: { leaveId: "$_id" },
           pipeline: [
-            { $match: { $expr: { $eq: ["$leave", "$$leaveId"] } } },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$leave", "$$leaveId"] },
+                    { $gte: ["$date", monthStart] },
+                    { $lte: ["$date", monthEnd] },
+                  ],
+                },
+              },
+            },
             { $count: "usedLeaves" },
           ],
           as: "dates",
@@ -134,7 +150,7 @@ router.get("/remaining/:typeId", auth, async (req, res) => {
       { $unwind: { path: "$dates", preserveNullAndEmptyArrays: true } },
       { $group: { _id: null, usedLeaves: { $sum: "$dates.usedLeaves" } } },
     ]);
-    return res.send(leaves); //aggregate always return array. in this case it always returns array of one element
+    return res.send(leaves[0]); //aggregate always return array. in this case it always returns array of one element
   } catch (err) {
     return res.status(500).send(err.message);
   }
