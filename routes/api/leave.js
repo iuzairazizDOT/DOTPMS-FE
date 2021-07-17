@@ -241,5 +241,35 @@ router.get("/remaining-leaves-all/:userId", auth, async (req, res) => {
     return res.status(500).send(err.message);
   }
 });
+router.get("/user-all-leaves/:userId", auth, async (req, res) => {
+  try {
+    let leaves = await Leave.aggregate([
+      {
+        $match: {
+          user: mongoose.Types.ObjectId(req.params.userId),
+        },
+      },
+      {
+        $lookup: {
+          from: "leavedetails",
+          let: { leaveId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [{ $eq: ["$leave", "$$leaveId"] }],
+                },
+              },
+            },
+          ],
+          as: "dates",
+        },
+      },
+    ]);
+    return res.send(leaves);
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+});
 
 module.exports = router;
