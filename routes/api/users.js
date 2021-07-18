@@ -124,6 +124,7 @@ router.post("/login", async (req, res) => {
     {
       _id: user._id,
       name: user.name,
+      status: user.status,
       userRole: user.userRole,
     },
     config.get("jwtPrivateKey")
@@ -184,13 +185,13 @@ router.put("/update-user/:id", auth, async (req, res) => {
   user.gender = req.body.gender;
   user.status = req.body.status;
   user.joiningDate = req.body.joiningDate;
-  user.password = req.body.password;
+  // user.password = req.body.password;
   user.salary = req.body.salary;
   user.workingHrs = req.body.workingHrs;
   user.machineNo = req.body.machineNo;
   user.workingDays = req.body.workingDays;
   user.userRole = req.body.userRole;
-  await user.generateHashedPassword();
+  // await user.generateHashedPassword();
   await user.save();
   return res.send(user);
 });

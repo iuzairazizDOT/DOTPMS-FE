@@ -114,7 +114,7 @@ router.put("/:id", auth, async (req, res) => {
     let leave = await Leave.findById(req.params.id);
     console.log(leave);
     if (!leave)
-      return res.status(400).send("client with given id is not present");
+      return res.status(400).send("leave with given id is not present");
     leave = extend(leave, req.body);
     await leave.save();
     return res.send(leave);
@@ -241,6 +241,7 @@ router.get("/remaining-leaves-all/:userId", auth, async (req, res) => {
     return res.status(500).send(err.message);
   }
 });
+
 router.get("/user-all-leaves/:userId", auth, async (req, res) => {
   try {
     let leaves = await Leave.aggregate([

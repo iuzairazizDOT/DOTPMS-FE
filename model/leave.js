@@ -11,12 +11,12 @@ const leaveSchema = mongoose.Schema(
     pmActionDate: { type: Date, default: null },
     adminStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "approved", "rejected", "unpaid"],
       default: "pending",
     },
     pmStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "approved", "rejected", "unpaid"],
       default: "pending",
     },
   },
