@@ -42,7 +42,9 @@ router.get("/", auth, async (req, res) => {
           as: "dates",
         },
       },
-    ]);
+    ]).sort({
+      createdAt: -1,
+    });
     return res.send(leaves);
   } catch (err) {
     return res.send(err);
@@ -251,15 +253,15 @@ router.get("/user-all-leaves/:userId", auth, async (req, res) => {
         },
       },
       {
-        $lookup:{
-          from:"leavetypes",
-          foreignField:"_id",
-          localField:"type",
-          as:"type",
-        }
+        $lookup: {
+          from: "leavetypes",
+          foreignField: "_id",
+          localField: "type",
+          as: "type",
+        },
       },
       {
-        $unwind:{path:"$type",preserveNullAndEmptyArrays:true},
+        $unwind: { path: "$type", preserveNullAndEmptyArrays: true },
       },
       {
         $lookup: {
