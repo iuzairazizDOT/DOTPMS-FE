@@ -15,7 +15,44 @@ router.get("/", auth, async (req, res) => {
     let page = Number(req.query.page ? req.query.page : 1);
     let perPage = Number(req.query.perPage ? req.query.perPage : 10);
     let skipRecords = perPage * (page - 1);
+    let user = req.query.user ? req.query.user : "";
+    let adminStatus = req.query.adminStatus ? req.query.adminStatus : "";
+    let pmStatus = req.query.pmStatus ? req.query.pmStatus : "";
+    let leaveStartDate = req.query.startDate ? req.query.startDate : "";
+    let leaveEndDate = req.query.endDate ? req.query.endDate : "";
+    let requestObject = {};
+    let requestObject1 = {};
+    let localArray = [{ $eq: ["$leave", "$$leaveId"] }];
+    if (user) {
+      requestObject.user = mongoose.Types.ObjectId(`${user}`);
+    } else {
+      null;
+    }
+    if (adminStatus) {
+      requestObject.adminStatus = adminStatus;
+    } else {
+      null;
+    }
+    if (pmStatus) {
+      requestObject.pmStatus = pmStatus;
+    } else {
+      null;
+    }
+    if (leaveStartDate != "") {
+      console.log("else", leaveStartDate);
+      leavestartdate = moment(leaveStartDate).startOf("day").toDate();
+      requestObject1.startDate = leavestartdate;
+      localArray.push({ $gte: ["$date", requestObject1.startDate] });
+    }
+    if (leaveEndDate != "") {
+      console.log("else", leaveEndDate);
+      leaveenddate = moment(leaveEndDate).startOf("day").toDate();
+      requestObject1.endDate = leaveenddate;
+      localArray.push({ $lte: ["$date", requestObject1.endDate] });
+    }
+
     let leaves = await Leave.aggregate([
+      { $match: requestObject },
       {
         $lookup: {
           from: "users",
@@ -37,14 +74,24 @@ router.get("/", auth, async (req, res) => {
       {
         $lookup: {
           from: "leavedetails",
-          localField: "_id",
-          foreignField: "leave",
+          let: { leaveId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: localArray,
+                },
+              },
+            },
+            // { $count: "usedLeaves" },
+          ],
           as: "dates",
         },
       },
     ]).sort({
       createdAt: -1,
     });
+
     return res.send(leaves);
   } catch (err) {
     return res.send(err);
