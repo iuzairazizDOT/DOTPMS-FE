@@ -185,7 +185,7 @@ router.post("/remaining-leaves", auth, async (req, res) => {
     let leaves = await Leave.aggregate([
       {
         $match: {
-          status: "pending",
+          adminStatus: "pending",
           type: mongoose.Types.ObjectId(leaveType),
           user: mongoose.Types.ObjectId(user),
         },
