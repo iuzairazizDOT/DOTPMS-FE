@@ -118,6 +118,22 @@ router.post("/new", auth, async (req, res) => {
       return res.status(500).send({ error: err });
     });
 });
+//update leave
+router.put("/:id", auth, async (req, res) => {
+  try {
+    let leave = await Leave.findById(req.params.id);
+    console.log(leave);
+    if (!leave)
+      return res.status(400).send("leave with given id is not present");
+    leave = extend(leave, req.body);
+    await leave.save();
+    return res.send(leave);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Invalid Id"); // when id is inavlid
+  }
+});
+
 router.get("/:id", auth, async (req, res) => {
   try {
     let page = Number(req.query.page ? req.query.page : 1);
@@ -158,20 +174,6 @@ router.get("/:id", auth, async (req, res) => {
   }
 });
 
-router.put("/:id", auth, async (req, res) => {
-  try {
-    let leave = await Leave.findById(req.params.id);
-    console.log(leave);
-    if (!leave)
-      return res.status(400).send("leave with given id is not present");
-    leave = extend(leave, req.body);
-    await leave.save();
-    return res.send(leave);
-  } catch {
-    return res.status(400).send("Invalid Id"); // when id is inavlid
-  }
-});
-
 router.post("/remaining-leaves", auth, async (req, res) => {
   try {
     let page = Number(req.query.page ? req.query.page : 1);
@@ -185,10 +187,9 @@ router.post("/remaining-leaves", auth, async (req, res) => {
     let leaves = await Leave.aggregate([
       {
         $match: {
-          $eq: ["$adminStatus", "pending"],
-          $eq: ["$adminStatus", "approved"],
           type: mongoose.Types.ObjectId(leaveType),
           user: mongoose.Types.ObjectId(user),
+          adminStatus: "pending",
         },
       },
       {
