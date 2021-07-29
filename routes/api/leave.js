@@ -189,7 +189,7 @@ router.post("/remaining-leaves", auth, async (req, res) => {
         $match: {
           type: mongoose.Types.ObjectId(leaveType),
           user: mongoose.Types.ObjectId(user),
-          adminStatus: "pending",
+          adminStatus: "approved",
         },
       },
       {
@@ -221,6 +221,55 @@ router.post("/remaining-leaves", auth, async (req, res) => {
     return res.status(500).send(err.message);
   }
 });
+router.post("/pending-leaves", auth, async (req, res) => {
+  try {
+    let page = Number(req.query.page ? req.query.page : 1);
+    let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+    let skipRecords = perPage * (page - 1);
+    let yearStart = moment().startOf("year").toDate();
+    let yearEnd = moment().endOf("year").toDate();
+    let moasnthStart = moment().utc().startOf("year").toDate();
+    let monasdthEnd = moment().utc().endOf("year").toDate();
+    const { leaveType, user } = req.body;
+    let leaves = await Leave.aggregate([
+      {
+        $match: {
+          type: mongoose.Types.ObjectId(leaveType),
+          user: mongoose.Types.ObjectId(user),
+          adminStatus: "pending",
+        },
+      },
+      {
+        $lookup: {
+          from: "leavedetails",
+          let: { leaveId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$leave", "$$leaveId"] },
+                    { $gte: ["$date", yearStart] },
+                    { $lte: ["$date", yearEnd] },
+                  ],
+                },
+              },
+            },
+            { $count: "pendingLeaves" },
+          ],
+          as: "dates",
+        },
+      },
+      { $unwind: { path: "$dates", preserveNullAndEmptyArrays: true } },
+      {
+        $group: { _id: null, pendingLeaves: { $sum: "$dates.pendingLeaves" } },
+      },
+    ]);
+    return res.send(leaves[0]); //aggregate always return array. in this case it always returns array of one element
+  } catch (err) {
+    return res.status(500).send(err.message);
+  }
+});
 
 router.get("/remaining-leaves-all/:userId", auth, async (req, res) => {
   try {
@@ -240,6 +289,7 @@ router.get("/remaining-leaves-all/:userId", auth, async (req, res) => {
                 $expr: {
                   $and: [
                     { $eq: ["$type", "$$leaveTypeId"] },
+                    { $eq: ["$adminStatus", "approved"] },
                     {
                       $eq: [
                         "$user",
