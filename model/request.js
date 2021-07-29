@@ -13,10 +13,15 @@ const requestSchema = mongoose.Schema(
     description: String,
     adminRemark: { type: String, default: null },
     adminActionDate: { type: Date, default: null },
-    status: {
+    adminStatus: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending",
+      enum: ["Pending", "Resolved", "Not Resolved"],
+      default: "Pending",
+    },
+    userStatus: {
+      type: String,
+      enum: ["Resolved", "Not Resolved"],
+      default: "Not Resolved",
     },
   },
   { timestamps: true }

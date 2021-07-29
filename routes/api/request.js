@@ -4,8 +4,10 @@ const { extend } = require("lodash");
 var router = express.Router();
 const { Request } = require("../../model/request");
 const auth = require("../../middlewares/auth");
+const mongoose = require("mongoose");
 
 /* Get All Request */
+
 router.get("/show-request", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
@@ -24,6 +26,31 @@ router.get("/show-request", auth, async (req, res) => {
 router.get("/:id", auth, async (req, res) => {
   try {
     let request = await Request.findById(req.params.id)
+      .populate("user")
+      .populate("requestType");
+    return res.send(request); //aggregate always return array. in this case it always returns array of one element
+  } catch (err) {
+    return res.send(err);
+  }
+});
+router.get("/myrequest/:id", auth, async (req, res) => {
+  try {
+    let request = await Request.find({
+      user: req.params.id,
+    })
+      .populate("user")
+      .populate("requestType");
+    return res.send(request); //aggregate always return array. in this case it always returns array of one element
+  } catch (err) {
+    return res.send(err);
+  }
+});
+
+router.get("myrequest/:id", auth, async (req, res) => {
+  try {
+    let request = await Request.find({
+      user: req.params.id,
+    })
       .populate("user")
       .populate("requestType");
     return res.send(request); //aggregate always return array. in this case it always returns array of one element
