@@ -6,6 +6,12 @@ const requestSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
+    requestRecievers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     requestType: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "RequestType",
