@@ -139,6 +139,20 @@ router.post("/whereEmployee/:id", auth, async (req, res) => {
   }
 });
 
+router.get("/myprojects/:id", auth, async (req, res) => {
+  try {
+    let project = await Project.find({
+      assignedUser: req.params.id,
+    })
+      .populate("user")
+      .populate("project")
+      .populate("status");
+    return res.send(project); //aggregate always return array. in this case it always returns array of one element
+  } catch (err) {
+    return res.send(err);
+  }
+});
+
 router.get("/project-with-tasks/:projectId", async (req, res) => {
   try {
     console.log("emp id", req.params.id);
