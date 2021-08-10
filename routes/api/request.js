@@ -14,12 +14,29 @@ router.get("/show-request", auth, async (req, res) => {
   let skipRecords = perPage * (page - 1);
   let request = await Request.find()
     .populate("user")
+    .populate("requestRecievers", "name")
     .populate("requestType")
     .sort({
       createdAt: -1,
-    })
-    .skip(skipRecords)
-    .limit(perPage);
+    });
+
+  return res.send(request);
+});
+
+router.get("/show-recieved-request", auth, async (req, res) => {
+  let page = Number(req.query.page ? req.query.page : 1);
+  let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+  let skipRecords = perPage * (page - 1);
+  let request = await Request.find({
+    requestRecievers: { _id: req.query.userId },
+  })
+    .populate("user")
+    .populate("requestRecievers", "name")
+    .populate("requestType")
+    .sort({
+      createdAt: -1,
+    });
+
   return res.send(request);
 });
 
@@ -27,12 +44,14 @@ router.get("/:id", auth, async (req, res) => {
   try {
     let request = await Request.findById(req.params.id)
       .populate("user")
+      .populate("requestRecievers", "name")
       .populate("requestType");
     return res.send(request); //aggregate always return array. in this case it always returns array of one element
   } catch (err) {
     return res.send(err);
   }
 });
+
 router.get("/myrequest/:id", auth, async (req, res) => {
   try {
     let request = await Request.find({
