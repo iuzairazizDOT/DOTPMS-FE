@@ -146,7 +146,8 @@ router.get("/myprojects/:id", auth, async (req, res) => {
     })
       .populate("user")
       .populate("project")
-      .populate("status");
+      .populate("status")
+      .populate("technology");
     return res.send(project); //aggregate always return array. in this case it always returns array of one element
   } catch (err) {
     return res.send(err);
