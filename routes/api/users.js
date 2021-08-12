@@ -3,6 +3,7 @@ var router = express.Router();
 const multer = require("multer");
 var fs = require("fs");
 var path = require("path");
+const { extend } = require("lodash");
 const { User } = require("../../model/user");
 const { UserProfile } = require("../../model/userProfile");
 const bcrypt = require("bcryptjs");
@@ -176,25 +177,50 @@ router.put("/update-password/:id", auth, async (req, res) => {
 });
 
 router.put("/update-user/:id", auth, async (req, res) => {
-  let user = await User.findById(req.params.id);
-  if (!user) {
-    return res.status(400).send("User with given id is not present"); // when there is no id in db
+  try {
+    let user = await User.findById(req.params.id);
+    console.log(user);
+    if (!user) return res.status(400).send("User with given id is not present");
+    console.log("request Nody", req.body.password);
+    console.log("user password", user.password);
+
+    if (req.body.password !== user.password) {
+      console.log("request Body shgahshahs", req.body.password);
+      console.log("user password", user.password);
+      user = extend(user, req.body);
+      await user.generateHashedPassword();
+      await user.save();
+    } else {
+      user = extend(user, req.body);
+      await user.save();
+    }
+
+    return res.send(user);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send("Invalid Id"); // when id is inavlid
   }
-  user.name = req.body.name;
-  user.email = req.body.email;
-  user.gender = req.body.gender;
-  user.status = req.body.status;
-  user.joiningDate = req.body.joiningDate;
-  user.password = req.body.password;
-  user.salary = req.body.salary;
-  user.workingHrs = req.body.workingHrs;
-  user.machineNo = req.body.machineNo;
-  user.workingDays = req.body.workingDays;
-  user.userRole = req.body.userRole;
-  await user.generateHashedPassword();
-  await user.save();
-  return res.send(user);
 });
+// router.put("/update-user/:id", auth, async (req, res) => {
+//   let user = await User.findById(req.params.id);
+//   if (!user) {
+//     return res.status(400).send("User with given id is not present"); // when there is no id in db
+//   }
+//   user.name = req.body.name;
+//   user.email = req.body.email;
+//   user.gender = req.body.gender;
+//   user.status = req.body.status;
+//   user.joiningDate = req.body.joiningDate;
+//   user.password = req.body.password;
+//   user.salary = req.body.salary;
+//   user.workingHrs = req.body.workingHrs;
+//   user.machineNo = req.body.machineNo;
+//   user.workingDays = req.body.workingDays;
+//   user.userRole = req.body.userRole;
+//   await user.generateHashedPassword();
+//   await user.save();
+//   return res.send(user);
+// });
 
 router.get("/:id", auth, async (req, res) => {
   let tasks, user;
