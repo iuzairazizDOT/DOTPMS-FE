@@ -21,7 +21,7 @@ router.post("/create-designation", auth, async (req, res) => {
   });
   if (designation)
     return res.status(400).send("Country With Given Name Already Exsists");
-  designation = new Country(req.body);
+  designation = new Designation(req.body);
   designation
     .save()
     .then((resp) => {
