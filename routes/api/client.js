@@ -12,7 +12,7 @@ router.get("/show-client", auth, async (req, res) => {
   let perPage = Number(req.query.perPage ? req.query.perPage : 1000);
   let skipRecords = perPage * (page - 1);
   let client = await Client.find()
-    .populate("country")
+    // .populate("country")
     .skip(skipRecords)
     .limit(perPage);
   return res.send(client);
@@ -22,7 +22,7 @@ router.get("/:id", auth, async (req, res) => {
   let client;
   let projects;
   try {
-    client = await Client.findById(req.params.id).populate("country");
+    client = await Client.findById(req.params.id);
     if (!client)
       return res.status(400).send("Client with given id is not present");
   } catch {

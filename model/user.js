@@ -22,6 +22,10 @@ const userSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Machine",
     },
+    designation: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Designation",
+    },
     workingDays: Number,
     userRole: String,
     image: String,

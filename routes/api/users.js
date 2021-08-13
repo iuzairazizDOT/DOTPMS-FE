@@ -68,6 +68,7 @@ router.get("/", auth, async function (req, res, next) {
   let user = await User.find(requestObject)
     .populate("technology")
     .populate("machineNo", "machineNo")
+    .populate("designation")
     .sort({
       createdAt: -1,
     })
@@ -227,6 +228,7 @@ router.get("/:id", auth, async (req, res) => {
   try {
     user = await User.findById(req.params.id)
       .populate("technology")
+      .populate("designation")
       .populate("machineNo", "machineNo");
     if (!user) {
       return res.status(400).send("user profile with given id is not present"); // when there is no id in db
