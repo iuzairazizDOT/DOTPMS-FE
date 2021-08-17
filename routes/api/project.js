@@ -56,6 +56,15 @@ router.get("/show-projects", auth, async (req, res) => {
         as: "tasks",
       },
     },
+    {
+      $lookup: {
+        from: "status",
+        localField: "status",
+        foreignField: "_id",
+        as: "status",
+      },
+    },
+    { $unwind: { path: "$status", preserveNullAndEmptyArrays: true } },
     { $unwind: { path: "$tasks", preserveNullAndEmptyArrays: true } },
     {
       $addFields: {

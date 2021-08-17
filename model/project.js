@@ -11,7 +11,16 @@ const projectScheme = mongoose.Schema(
     estHrs: Number,
     remarks: String,
     workdone: String,
+    projectType: String,
     cost: Number,
+    hourlyCost: {
+      type: Number,
+      default: null,
+    },
+    clientHours: {
+      type: Number,
+      default: null,
+    },
     orderNum: String,
     Rprofit: {
       type: Number,

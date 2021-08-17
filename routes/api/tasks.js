@@ -255,7 +255,67 @@ router.get("/by-employee/:empId", auth, async (req, res) => {
   console.log(req.params.empId);
 
   let task = await Tasks.aggregate([
-    { $match: { assignedTo: mongoose.Types.ObjectId(req.params.empId)} },
+    { $match: { assignedTo: mongoose.Types.ObjectId(req.params.empId) } },
+    {
+      $lookup: {
+        from: "projects",
+        localField: "project",
+        foreignField: "_id",
+        as: "project",
+      },
+    },
+    { $unwind: { path: "$project", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "addedBy",
+        foreignField: "_id",
+        as: "addedBy",
+      },
+    },
+    { $unwind: { path: "$addedBy", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "teamLead",
+        foreignField: "_id",
+        as: "teamLead",
+      },
+    },
+    { $unwind: { path: "$teamLead", preserveNullAndEmptyArrays: true } },
+    {
+      $lookup: {
+        from: "timesheets",
+        let: { taskId: "$_id" },
+        pipeline: [
+          { $match: { $expr: { $eq: ["$task", "$$taskId"] } } },
+          { $group: { _id: null, actualHrs: { $sum: "$workedHrs" } } },
+          { $project: { _id: 0 } },
+        ],
+        as: "timesheet",
+      },
+    },
+    { $unwind: { path: "$timesheet", preserveNullAndEmptyArrays: true } },
+    { $sort: { createdAt: -1 } },
+  ]);
+
+  return res.send(task);
+});
+
+router.get("/by-employee-late/:empId", auth, async (req, res) => {
+  const today = moment().toDate();
+  // const from_date = today.toDate();
+  console.log("today", today);
+  console.log(req.params.empId);
+
+  let task = await Tasks.aggregate([
+    {
+      $match: {
+        assignedTo: mongoose.Types.ObjectId(req.params.empId),
+        endTime: { $gte: today },
+        status: { $ne: "completed" },
+      },
+    },
     {
       $lookup: {
         from: "projects",
@@ -304,16 +364,17 @@ router.get("/by-employee/:empId", auth, async (req, res) => {
 
 router.get("/by-employee-weekly/:empId", auth, async (req, res) => {
   const today = moment();
-  const from_date = today.startOf('week').toDate();
-  const to_date = today.endOf('week').toDate();
-  console.log("week", to_date)
+  const from_date = today.startOf("week").toDate();
+  const to_date = today.endOf("week").toDate();
+  console.log("week", to_date);
   console.log(req.params.empId);
 
   let task = await Tasks.aggregate([
-    { $match: { 
-      assignedTo: mongoose.Types.ObjectId(req.params.empId), 
-      endTime: {$lte : to_date, $gte: from_date}
-    } 
+    {
+      $match: {
+        assignedTo: mongoose.Types.ObjectId(req.params.empId),
+        endTime: { $lte: to_date, $gte: from_date },
+      },
     },
     {
       $lookup: {
@@ -363,16 +424,17 @@ router.get("/by-employee-weekly/:empId", auth, async (req, res) => {
 
 router.get("/by-employee-next-week/:empId", auth, async (req, res) => {
   const today = moment();
-  const from_date = today.startOf('week').add(1, 'Week').toDate();
-  const to_date = today.endOf('week').add(1, 'Week').toDate();
-  console.log("week", to_date)
+  const from_date = today.startOf("week").add(1, "Week").toDate();
+  const to_date = today.endOf("week").add(1, "Week").toDate();
+  console.log("week", to_date);
   console.log(req.params.empId);
 
   let task = await Tasks.aggregate([
-    { $match: { 
-      assignedTo: mongoose.Types.ObjectId(req.params.empId), 
-      endTime: {$lte : to_date, $gte: from_date}
-    } 
+    {
+      $match: {
+        assignedTo: mongoose.Types.ObjectId(req.params.empId),
+        endTime: { $lte: to_date, $gte: from_date },
+      },
     },
     {
       $lookup: {
@@ -422,16 +484,17 @@ router.get("/by-employee-next-week/:empId", auth, async (req, res) => {
 
 router.get("/by-employee-next-month/:empId", auth, async (req, res) => {
   const today = moment();
-  const from_date = today.startOf('week').add(1, 'Month').toDate();
-  const to_date = today.endOf('week').add(1, 'Month').toDate();
-  console.log("week", to_date)
+  const from_date = today.startOf("week").add(1, "Month").toDate();
+  const to_date = today.endOf("week").add(1, "Month").toDate();
+  console.log("week", to_date);
   console.log(req.params.empId);
 
   let task = await Tasks.aggregate([
-    { $match: { 
-      assignedTo: mongoose.Types.ObjectId(req.params.empId), 
-      endTime: {$lte : to_date, $gte: from_date}
-    } 
+    {
+      $match: {
+        assignedTo: mongoose.Types.ObjectId(req.params.empId),
+        endTime: { $lte: to_date, $gte: from_date },
+      },
     },
     {
       $lookup: {
@@ -479,8 +542,6 @@ router.get("/by-employee-next-month/:empId", auth, async (req, res) => {
   return res.send(task);
 });
 
-
-
 router.post("/by-employee-project", auth, async (req, res) => {
   let { empId, projectId } = req.body;
   console.log("body", req.body);
@@ -522,7 +583,6 @@ router.post("/employee", auth, async (req, res) => {
         $match: {
           assignedTo: mongoose.Types.ObjectId(empId),
           createdAt: { $lte: endDate },
-          
         },
       },
       { $sort: { createdAt: -1 } },
