@@ -38,8 +38,9 @@ const projectScheme = mongoose.Schema(
     fCost: String,
     phase: [
       {
+        index: Number,
         phasename: String,
-        estTime: Number,
+        estHrs: Number,
       },
     ],
     technology: {
