@@ -312,7 +312,7 @@ router.get("/by-employee-late/:empId", auth, async (req, res) => {
     {
       $match: {
         assignedTo: mongoose.Types.ObjectId(req.params.empId),
-        endTime: { $gte: today },
+        endTime: { $lte: today },
         status: { $ne: "completed" },
       },
     },
