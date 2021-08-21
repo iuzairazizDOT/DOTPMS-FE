@@ -6,7 +6,7 @@ const { PaymentDetial } = require("../../model/paymentDetials");
 const auth = require("../../middlewares/auth");
 
 /* Get All Designations And Users */
-router.get("/show", auth, async (req, res) => {
+router.get("/", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
@@ -15,7 +15,7 @@ router.get("/show", auth, async (req, res) => {
 });
 
 /*Add new Designation*/
-router.post("/create", auth, async (req, res) => {
+router.post("/", auth, async (req, res) => {
   let payment = await PaymentDetial.findOne({
     project: req.body.project,
   });
