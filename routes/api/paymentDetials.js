@@ -14,6 +14,16 @@ router.get("/", auth, async (req, res) => {
   return res.send(payment);
 });
 
+router.get("/id", auth, async (req, res) => {
+  let page = Number(req.query.page ? req.query.page : 1);
+  let perPage = Number(req.query.perPage ? req.query.perPage : 10);
+  let skipRecords = perPage * (page - 1);
+  let payment = await PaymentDetial.findById(req.params.id)
+    .skip(skipRecords)
+    .limit(perPage);
+  return res.send(payment);
+});
+
 /*Add new Designation*/
 router.post("/", auth, async (req, res) => {
   let payment = await PaymentDetial.findOne({
