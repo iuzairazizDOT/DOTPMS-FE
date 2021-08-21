@@ -10,7 +10,7 @@ router.get("/", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
-  let payment = await PaymentDetial.find().skip(skipRecords).limit(perPage);
+  let payment = await PaymentDetial.find().populate("project").skip(skipRecords).limit(perPage);
   return res.send(payment);
 });
 
