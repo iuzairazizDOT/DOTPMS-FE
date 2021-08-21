@@ -20,7 +20,7 @@ router.post("/", auth, async (req, res) => {
     project: req.body.project,
   });
   if (payment) {
-    payment = [...payment.paymentDetials, req.body.paymentDetials];
+    payment.paymentDetials = [...payment.paymentDetials, req.body.paymentDetials];
   } else {
     payment = new PaymentDetial(req.body);
   }
