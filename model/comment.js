@@ -10,6 +10,12 @@ const commentSchema = mongoose.Schema(
     task: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tasks",
+      default: null,
+    },
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+      default: null,
     },
   },
   { timestamps: true }

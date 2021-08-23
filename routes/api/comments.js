@@ -31,6 +31,29 @@ router.post("/", auth, async (req, res) => {
     });
 });
 
+// get comments in project
+router.get("/project/:projectId", auth, async (req, res) => {
+  const projectId = req.params.projectId;
+  console.log("project ID", projectId);
+  let comments = await Comment.find({ project: projectId })
+    .populate("project")
+    .populate("user");
+  return res.send(comments);
+});
+
+router.post("/projects", auth, async (req, res) => {
+  console.log(req.body);
+  const comment = new Comment(req.body);
+  comment
+    .save()
+    .then((resp) => {
+      return res.send(resp);
+    })
+    .catch((err) => {
+      return res.status(500).send({ error: err });
+    });
+});
+
 // Update Tasks
 // router.put("/:id", auth, async (req, res) => {
 //   try {
