@@ -10,15 +10,25 @@ router.get("/", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
-  let payment = await PaymentDetial.find().populate({path:"project", populate: { path: "currency", model: "Currency"}}).skip(skipRecords).limit(perPage);
+  let payment = await PaymentDetial.find()
+    .populate({
+      path: "project",
+      populate: { path: "currency", model: "Currency" },
+    })
+    .skip(skipRecords)
+    .limit(perPage);
   return res.send(payment);
 });
 
-router.get("/id", auth, async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   let page = Number(req.query.page ? req.query.page : 1);
   let perPage = Number(req.query.perPage ? req.query.perPage : 10);
   let skipRecords = perPage * (page - 1);
   let payment = await PaymentDetial.findById(req.params.id)
+    .populate({
+      path: "project",
+      populate: { path: "currency", model: "Currency" },
+    })
     .skip(skipRecords)
     .limit(perPage);
   return res.send(payment);
@@ -30,7 +40,10 @@ router.post("/", auth, async (req, res) => {
     project: req.body.project,
   });
   if (payment) {
-    payment.paymentDetials = [...payment.paymentDetials, req.body.paymentDetials];
+    payment.paymentDetials = [
+      ...payment.paymentDetials,
+      req.body.paymentDetials,
+    ];
   } else {
     payment = new PaymentDetial(req.body);
   }
