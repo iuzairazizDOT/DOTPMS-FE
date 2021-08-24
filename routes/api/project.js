@@ -248,7 +248,7 @@ router.get("/project-with-tasks/:projectId", async (req, res) => {
       { $unwind: { path: "$platform", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$service", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$nature", preserveNullAndEmptyArrays: true } },
-      { $unwind: { path: "$technology", preserveNullAndEmptyArrays: true } },
+
       { $unwind: { path: "$currency", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$status", preserveNullAndEmptyArrays: true } },
       {
@@ -681,7 +681,7 @@ router.get("/report", async (req, res) => {
       { $unwind: { path: "$platform", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$service", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$nature", preserveNullAndEmptyArrays: true } },
-      { $unwind: { path: "$technology", preserveNullAndEmptyArrays: true } },
+
       { $unwind: { path: "$currency", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$status", preserveNullAndEmptyArrays: true } },
       {
