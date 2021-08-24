@@ -98,6 +98,7 @@ router.post("/register", upload, async (req, res) => {
   user.machineNo = req.body.machineNo;
   user.workingDays = req.body.workingDays;
   user.userRole = req.body.userRole;
+
   await user.generateHashedPassword();
   await user.save();
   return res.send(
