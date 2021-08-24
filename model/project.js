@@ -43,10 +43,12 @@ const projectScheme = mongoose.Schema(
         estHrs: Number,
       },
     ],
-    technology: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Technology",
-    },
+    technology: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Technology",
+      },
+    ],
 
     nature: {
       type: mongoose.Schema.Types.ObjectId,
