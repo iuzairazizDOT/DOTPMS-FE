@@ -27,7 +27,7 @@ const userSchema = mongoose.Schema(
       ref: "Designation",
     },
     workingDays: Number,
-    userRole: String,
+    userRole: [{ type: String }],
     image: String,
     technology: [
       {
@@ -35,10 +35,12 @@ const userSchema = mongoose.Schema(
         ref: "Technology",
       },
     ],
-    role: {
-      type: String,
-      default: "User",
-    },
+    role: [
+      {
+        type: String,
+        default: "User",
+      },
+    ],
   },
   { timestamps: true }
 );
