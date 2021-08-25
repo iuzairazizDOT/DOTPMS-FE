@@ -36,6 +36,10 @@ const taskSchema = mongoose.Schema(
       ref: "User",
       default: null,
     },
+    phase: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
+    },
     assignedTo: [
       {
         type: mongoose.Schema.Types.ObjectId,
