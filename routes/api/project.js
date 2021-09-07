@@ -342,7 +342,7 @@ router.get("/project-with-tasks/:projectId", async (req, res) => {
   }
 });
 // Project details for PM
-router.get("/pm-project-with-tasks/:projectId", async (req, res) => {
+router.get("/pm-project-with-tasks/:projectId/:userId", async (req, res) => {
   try {
     console.log("emp id", req.params.id);
 
