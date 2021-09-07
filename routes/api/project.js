@@ -347,7 +347,12 @@ router.get("/pm-project-with-tasks/:projectId/:userId", async (req, res) => {
     console.log("emp id", req.params.id);
 
     let project = await Project.aggregate([
-      { $match: { _id: Mongoose.Types.ObjectId(req.params.projectId) } },
+      {
+        $match: {
+          _id: Mongoose.Types.ObjectId(req.params.projectId),
+          assignedUser: Mongoose.Types.ObjectId(req.params.userId),
+        },
+      },
       {
         $lookup: {
           from: "users",
@@ -505,6 +510,7 @@ router.get("/pm-project-with-tasks/:projectId/:userId", async (req, res) => {
           cost: 0,
           Pdeduction: 0,
           Rprofit: 0,
+          otherDeduction: 0,
           "assignedUser.salary": 0,
           "projectManager.salary": 0,
           "tasks.teamLead.salary": 0,
@@ -549,14 +555,6 @@ router.get("/user-project-with-tasks/:projectId/:userId", async (req, res) => {
           as: "projectManager",
         },
       },
-      // {
-      //   $lookup: {
-      //     from: "services",
-      //     localField: "service",
-      //     foreignField: "_id",
-      //     as: "service",
-      //   },
-      // },
       {
         $lookup: {
           from: "natures",
@@ -585,7 +583,6 @@ router.get("/user-project-with-tasks/:projectId/:userId", async (req, res) => {
       {
         $unwind: { path: "$projectManager", preserveNullAndEmptyArrays: true },
       },
-      // { $unwind: { path: "$service", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$nature", preserveNullAndEmptyArrays: true } },
       { $unwind: { path: "$status", preserveNullAndEmptyArrays: true } },
       {
@@ -677,6 +674,7 @@ router.get("/user-project-with-tasks/:projectId/:userId", async (req, res) => {
           "tasks.assignedTo.salary": 0,
           Pdeduction: 0,
           Rprofit: 0,
+          otherDeduction: 0,
         },
       },
     ]);
